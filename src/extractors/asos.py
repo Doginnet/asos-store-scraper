@@ -37,6 +37,22 @@ class AsosExtractor(BaseExtractor):
         self.currency = resolved_currency
         self.lang = lang
 
+        # Automatically sync store routing cookies into the HTTP client session
+        self.sync_session_cookies()
+
+    def sync_session_cookies(self) -> None:
+        """
+        Synchronizes store, country, and currency into session cookies.
+        Guarantees that Akamai edge nodes and ASOS storeapi route correctly without 400 errors.
+        """
+        self.client.session.cookies.update({
+            "storeCode": self.store,
+            "browseCountry": self.country,
+            "browseCurrency": self.currency,
+            "geocountry": self.country,
+            "keyStoreDataversion": settings.KEYSTORE_DATAVERSION,
+        })
+
     def _build_params(self, offset: int, limit: int) -> Dict[str, Any]:
         return {
             "channel": "desktop-web",
@@ -54,6 +70,7 @@ class AsosExtractor(BaseExtractor):
     def fetch_page_raw(self, category_id: int, offset: int = 0, limit: int = settings.DEFAULT_LIMIT) -> Dict[str, Any]:
         """
         Fetches a single page of category results as raw JSON dictionary.
+        Includes automatic session warm-up, cookie sync, and self-healing.
         """
         url = f"{self.SEARCH_ENDPOINT}/{category_id}"
         params = self._build_params(offset=offset, limit=limit)
@@ -61,12 +78,14 @@ class AsosExtractor(BaseExtractor):
         logger.info(f"Fetching ASOS category {category_id} | offset={offset} limit={limit} store={self.store} country={self.country}")
         response = self.client.get(url, params=params)
         
-        # Self-healing: if store was rejected, recover with default ROE store
+        # Self-healing: if store was rejected by Akamai, warm up edge session & sync store cookies
         if response.status_code == 400 and "No valid store was found" in response.text:
-            logger.warning("ASOS returned 'No valid store was found'. Auto-recovering with store=ROE, country=BG...")
+            logger.warning("ASOS returned 'No valid store was found'. Healing session: warming up edge cookies & re-routing...")
             self.store = "ROE"
             self.country = "BG"
             self.currency = "EUR"
+            self.client.warmup()
+            self.sync_session_cookies()
             params = self._build_params(offset=offset, limit=limit)
             response = self.client.get(url, params=params)
 

@@ -35,6 +35,7 @@ class ResilientHttpClient:
 
         self.session = requests.Session(impersonate=self.impersonate)
         self._init_default_headers()
+        self._init_default_cookies()
 
     def _init_default_headers(self) -> None:
         self.session.headers.update({
@@ -51,6 +52,25 @@ class ResilientHttpClient:
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-origin",
         })
+
+    def _init_default_cookies(self) -> None:
+        """Inject default store routing cookies to guarantee Akamai and ASOS storeapi routing."""
+        self.session.cookies.update({
+            "storeCode": settings.STORE_CODE,
+            "browseCountry": settings.COUNTRY,
+            "browseCurrency": settings.CURRENCY,
+            "geocountry": settings.COUNTRY,
+            "keyStoreDataversion": settings.KEYSTORE_DATAVERSION,
+        })
+
+    def warmup(self, url: str = settings.BASE_URL) -> None:
+        """Lightweight warmup request to establish edge session and fresh security tokens."""
+        try:
+            logger.debug(f"Warming up HTTP session against {url}...")
+            resp = self.session.get(url, timeout=10)
+            logger.debug(f"Session warmed up successfully (HTTP {resp.status_code}, {len(self.session.cookies)} cookies).")
+        except Exception as exc:
+            logger.warning(f"Session warmup warning (non-fatal): {exc}")
 
     def request(
         self,

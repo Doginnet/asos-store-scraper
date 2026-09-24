@@ -91,27 +91,35 @@ COUNTRY_STORE_MAP: Dict[str, Dict[str, str]] = {
 def resolve_store_and_currency(country: str = "BG", store: Optional[str] = None, currency: Optional[str] = None) -> Tuple[str, str, str]:
     """
     Safely resolves country, store code, and currency to prevent ASOS 'No valid store was found' 400 errors.
+    Ensures that (country, store, currency) are mutually compatible according to ASOS routing rules.
     """
     country_upper = (country or "BG").strip().upper()
-    
-    # If store was provided, normalize
     store_upper = store.strip().upper() if store else None
 
-    # Check if store itself is a known store code
-    if store_upper in ("ROE", "COM"):
-        resolved_store = store_upper
-    elif country_upper in COUNTRY_STORE_MAP:
-        resolved_store = COUNTRY_STORE_MAP[country_upper]["store"]
-    else:
-        # Default fallback to Rest of Europe
-        resolved_store = "ROE"
+    # If country is mapped, use its store and currency as canonical baseline
+    if country_upper in COUNTRY_STORE_MAP:
+        mapping = COUNTRY_STORE_MAP[country_upper]
+        canonical_store = mapping["store"]
+        canonical_currency = mapping["currency"]
 
-    # Resolve currency
-    if currency:
-        resolved_currency = currency.strip().upper()
-    elif country_upper in COUNTRY_STORE_MAP:
-        resolved_currency = COUNTRY_STORE_MAP[country_upper]["currency"]
+        # If user explicitly passed a store code, ensure cross-compatibility
+        if store_upper in ("ROE", "COM"):
+            if canonical_store != store_upper:
+                # Resolve mismatch (e.g., store=COM with country=BG)
+                if store_upper == "COM":
+                    country_upper = "GB"
+                    canonical_currency = "GBP"
+                else:
+                    country_upper = "BG"
+                    canonical_currency = "EUR"
+            resolved_store = store_upper
+        else:
+            resolved_store = canonical_store
+
+        resolved_currency = currency.strip().upper() if currency else canonical_currency
     else:
-        resolved_currency = "EUR"
+        # Unknown country, fallback to Rest of Europe / EUR
+        resolved_store = store_upper if store_upper in ("ROE", "COM") else "ROE"
+        resolved_currency = currency.strip().upper() if currency else "EUR"
 
     return country_upper, resolved_store, resolved_currency
