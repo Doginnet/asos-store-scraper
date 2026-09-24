@@ -1,4 +1,5 @@
 from pathlib import Path
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,8 +14,16 @@ class Settings(BaseSettings):
     STORE_CODE: str = "ROE"
     COUNTRY: str = "BG"
     CURRENCY: str = "EUR"
-    LANG: str = "en-GB"
+    LANG: str = Field(default="en-GB", validation_alias=AliasChoices("ASOS_LANG", "BROWSE_LANGUAGE", "LANG"))
     KEYSTORE_DATAVERSION: str = "7qyyrb1-46"
+
+    @field_validator("LANG", mode="after")
+    @classmethod
+    def sanitize_lang(cls, v: str) -> str:
+        """Ensure system POSIX locales like en_US.UTF-8 don't leak into ASOS API calls."""
+        if "_" in v or "." in v or not v:
+            return "en-GB"
+        return v
 
     DEFAULT_LIMIT: int = 72
     REQUEST_TIMEOUT: int = 20

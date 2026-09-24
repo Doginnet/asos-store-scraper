@@ -66,7 +66,7 @@ class AsosProduct(BaseModel):
     colour: str = ""
     price: AsosPrice
     url: str
-    imageUrl: str
+    imageUrl: str = ""
     additionalImageUrls: list[str] = Field(default_factory=list)
     isSellingFast: bool = False
     isPromotion: bool = False
@@ -88,11 +88,13 @@ class AsosProduct(BaseModel):
             return f"https://www.asos.com/{path}"
         return v
 
-    @field_validator("imageUrl")
+    @field_validator("imageUrl", mode="before")
     @classmethod
-    def normalize_image_url(cls, v: str) -> str:
-        """Ensure image URL has https:// protocol."""
-        return _normalize_image_url(v)
+    def normalize_image_url(cls, v: Any) -> str:
+        """Ensure image URL has https:// protocol if string, or return empty string."""
+        if not v:
+            return ""
+        return _normalize_image_url(str(v))
 
     @field_validator("additionalImageUrls")
     @classmethod

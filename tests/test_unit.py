@@ -108,3 +108,33 @@ def test_product_url_validator_variations() -> None:
         "https://images.asos-media.com/extra1.jpg",
         "https://images.asos-media.com/extra2.jpg",
     ]
+
+
+@pytest.mark.unit
+def test_null_image_url_handling() -> None:
+    """Ensure null/None/empty imageUrl parses without ValidationError."""
+    prod = AsosProduct.model_validate({
+        "id": 2,
+        "name": "Placeholder Item",
+        "productCode": 200,
+        "brandName": "Brand",
+        "price": {"current": {"value": 50.0}},
+        "url": "/item/2",
+        "imageUrl": None,
+    })
+    assert prod.imageUrl == ""
+
+
+@pytest.mark.unit
+def test_language_sanitization(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Ensure POSIX locales like en_US.UTF-8 from terminal environments are sanitized."""
+    from config.settings import Settings
+    from src.extractors.asos import AsosExtractor
+
+    monkeypatch.setenv("LANG", "en_US.UTF-8")
+    s = Settings()
+    assert s.LANG == "en-GB"
+
+    extractor = AsosExtractor(lang="en_US.UTF-8")
+    assert extractor.lang == "en-GB"
+

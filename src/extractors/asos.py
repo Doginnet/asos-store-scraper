@@ -35,7 +35,8 @@ class AsosExtractor(BaseExtractor):
         self.country = resolved_country
         self.store = resolved_store
         self.currency = resolved_currency
-        self.lang = lang
+        # Ensure POSIX locale (like en_US.UTF-8 from terminal env) is sanitized to ASOS format
+        self.lang = "en-GB" if ("_" in lang or "." in lang or not lang) else lang
 
         # Automatically sync store routing cookies into the HTTP client session
         self.sync_session_cookies()
@@ -86,7 +87,11 @@ class AsosExtractor(BaseExtractor):
         params = self._build_params(offset=offset, limit=limit)
         
         logger.info(f"Fetching ASOS category {category_id} | offset={offset} limit={limit} store={self.store} country={self.country}")
+        logger.info(f'Fetch URL: {url}')        # Debug info, remove later
+        logger.info(f'Params: {params}')        # Debug info, remove later
         response = self.client.get(url, params=params)
+        
+        # channel=desktop-web&country=BG&currency=EUR&keyStoreDataversion=7qyyrb1-46&lang=en-GB&limit=16&offset=0&rowlength=4&store=ROE&tstSearchSponsoredProducts=true postman url
         
         # Self-healing: if store was rejected by Akamai, warm up edge session & sync store cookies
         if response.status_code == 400 and "No valid store was found" in response.text:
