@@ -1,5 +1,29 @@
 [
   {
+    "id": 209619900,
+    "name": "Topman oversized fit jersey cardigan in grey",
+    "brand": "Topman",
+    "url": "https://www.asos.com/topman/topman-oversized-fit-jersey-cardigan-in-grey/prd/209619900#colourWayId-209619937",
+    "image_url": "https://images.asos-media.com/products/topman-oversized-fit-jersey-cardigan-in-grey/209619900-1-greymarl",
+    "is_selling_fast": 0,
+    "current_price": 11.99,
+    "previous_price": 49.99,
+    "discount_percent": 76.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 209526451,
+    "name": "New Look 1/4 zip funnel neck sweatshirt in mid grey 300gsm",
+    "brand": "New Look",
+    "url": "https://www.asos.com/new-look/new-look-1-4-zip-funnel-neck-sweatshirt-in-mid-grey-300gsm/prd/209526451#colourWayId-209526464",
+    "image_url": "https://images.asos-media.com/products/new-look-1-4-zip-funnel-neck-sweatshirt-in-mid-grey-300gsm/209526451-1-04midgrey",
+    "is_selling_fast": 0,
+    "current_price": 8.49,
+    "previous_price": 34.99,
+    "discount_percent": 75.7,
+    "currency": "EUR"
+  },
+  {
     "id": 207050632,
     "name": "Nike Gato suede trainers in green",
     "brand": "Nike",
@@ -356,6 +380,18 @@
     "is_selling_fast": 0,
     "current_price": 40.0,
     "previous_price": 100.0,
+    "discount_percent": 60.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 208950790,
+    "name": "ASOS DESIGN premium heavyweight oversized hoodie in 400gsm charcoal - CHARCOAL",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-premium-heavyweight-oversized-hoodie-in-400gsm-charcoal-charcoal/prd/208950790#colourWayId-208950805",
+    "image_url": "https://images.asos-media.com/products/asos-design-premium-heavyweight-oversized-hoodie-in-400gsm-charcoal-charcoal/208950790-1-obsidian",
+    "is_selling_fast": 1,
+    "current_price": 15.99,
+    "previous_price": 39.99,
     "discount_percent": 60.0,
     "currency": "EUR"
   },
@@ -1161,42 +1197,6 @@
     "current_price": 64.99,
     "previous_price": 120.0,
     "discount_percent": 45.8,
-    "currency": "EUR"
-  },
-  {
-    "id": 201956401,
-    "name": "Converse Chuck Taylor All Star Ox Wide Fit trainers in black",
-    "brand": "Converse",
-    "url": "https://www.asos.com/converse/converse-chuck-taylor-all-star-ox-wide-fit-trainers-in-black/prd/201956401#colourWayId-201956424",
-    "image_url": "https://images.asos-media.com/products/converse-chuck-taylor-all-star-ox-wide-fit-trainers-in-black/201956401-1-black",
-    "is_selling_fast": 0,
-    "current_price": 37.99,
-    "previous_price": 70.0,
-    "discount_percent": 45.7,
-    "currency": "EUR"
-  },
-  {
-    "id": 210052522,
-    "name": "ASOS DESIGN panelled trainers in khaki suede and stone leather",
-    "brand": "ASOS DESIGN",
-    "url": "https://www.asos.com/asos-design/asos-design-panelled-trainers-in-khaki-suede-and-stone-leather/prd/210052522#colourWayId-210052527",
-    "image_url": "https://images.asos-media.com/products/asos-design-panelled-trainers-in-khaki-suede-and-stone-leather/210052522-1-khakioffwhite",
-    "is_selling_fast": 0,
-    "current_price": 30.99,
-    "previous_price": 56.99,
-    "discount_percent": 45.6,
-    "currency": "EUR"
-  },
-  {
-    "id": 209612593,
-    "name": "adidas Originals Adistar Control 5 trainers in silver and blue",
-    "brand": "adidas Originals",
-    "url": "https://www.asos.com/adidas-originals/adidas-originals-adistar-control-5-trainers-in-silver-and-blue/prd/209612593#colourWayId-209612599",
-    "image_url": "https://images.asos-media.com/products/adidas-originals-adistar-control-5-trainers-in-silver-and-blue/209612593-1-grey",
-    "is_selling_fast": 0,
-    "current_price": 59.99,
-    "previous_price": 110.0,
-    "discount_percent": 45.5,
     "currency": "EUR"
   }
 ]
