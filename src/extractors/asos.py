@@ -40,18 +40,28 @@ class AsosExtractor(BaseExtractor):
         # Automatically sync store routing cookies into the HTTP client session
         self.sync_session_cookies()
 
+    CURRENCY_ID_MAP: Dict[str, str] = {
+        "EUR": "19",
+        "GBP": "1",
+        "USD": "2",
+    }
+
     def sync_session_cookies(self) -> None:
         """
         Synchronizes store, country, and currency into session cookies.
-        Guarantees that Akamai edge nodes and ASOS storeapi route correctly without 400 errors.
+        Uses verified Postman cookie set as base and updates store routing fields.
         """
-        self.client.session.cookies.update({
+        curr_id = self.CURRENCY_ID_MAP.get(self.currency, "19")
+        cookie_payload = {
+            **settings.DEFAULT_COOKIES,
             "storeCode": self.store,
             "browseCountry": self.country,
             "browseCurrency": self.currency,
             "geocountry": self.country,
+            "currency": curr_id,
             "keyStoreDataversion": settings.KEYSTORE_DATAVERSION,
-        })
+        }
+        self.client.session.cookies.update(cookie_payload)
 
     def _build_params(self, offset: int, limit: int) -> Dict[str, Any]:
         return {

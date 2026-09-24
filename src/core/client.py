@@ -40,7 +40,7 @@ class ResilientHttpClient:
     def _init_default_headers(self) -> None:
         self.session.headers.update({
             "accept": "application/json, text/plain, */*",
-            "accept-language": "en-US,en;q=0.9",
+            "accept-language": "en-US,en;q=0.9,ru;q=0.8",
             "asos-c-name": "asos-web-ui-library",
             "asos-c-plat": "Web",
             "asos-c-ver": "5.0.0",
@@ -54,14 +54,8 @@ class ResilientHttpClient:
         })
 
     def _init_default_cookies(self) -> None:
-        """Inject default store routing cookies to guarantee Akamai and ASOS storeapi routing."""
-        self.session.cookies.update({
-            "storeCode": settings.STORE_CODE,
-            "browseCountry": settings.COUNTRY,
-            "browseCurrency": settings.CURRENCY,
-            "geocountry": settings.COUNTRY,
-            "keyStoreDataversion": settings.KEYSTORE_DATAVERSION,
-        })
+        """Inject verified Postman session cookies to guarantee 100% storeapi & edge compatibility."""
+        self.session.cookies.update(settings.DEFAULT_COOKIES)
 
     def warmup(self, url: str = settings.BASE_URL) -> None:
         """Lightweight warmup request to establish edge session and fresh security tokens."""
