@@ -1,0 +1,45 @@
+2026-09-24 22:30:40.697 | INFO     | src.extractors.asos:fetch_page_raw:54 - Fetching ASOS category 5775 | offset=0 limit=72
+2026-09-24 22:30:40.697 | DEBUG    | src.core.client:request:85 - [1/3] GET https://www.asos.com/api/product/search/v2/categories/5775
+2026-09-24 22:30:41.541 | ERROR    | __main__:main:95 - Error during extraction: Unexpected status code 400: [{"parameterName":"storeapi","errorCode":"","errorMessage":"No valid store was found"}]
+2026-09-24 22:32:56.852 | INFO     | src.extractors.asos:fetch_page_raw:54 - Fetching ASOS category 5775 | offset=0 limit=72
+2026-09-24 22:32:56.853 | DEBUG    | src.core.client:request:85 - [1/3] GET https://www.asos.com/api/product/search/v2/categories/5775
+2026-09-24 22:32:57.859 | INFO     | src.extractors.asos:iter_category:90 - Category 5775 contains total 1257 items.
+2026-09-24 22:32:58.757 | INFO     | src.extractors.asos:fetch_page_raw:54 - Fetching ASOS category 5775 | offset=72 limit=72
+2026-09-24 22:32:58.757 | DEBUG    | src.core.client:request:85 - [1/3] GET https://www.asos.com/api/product/search/v2/categories/5775
+2026-09-24 22:32:59.522 | INFO     | src.extractors.asos:iter_category:101 - Reached max requested items limit (144). Stopping.
+2026-09-24 22:32:59.588 | INFO     | src.pipelines.db:upsert_products:118 - Saved 144 products and price records into data\asos.db
+2026-09-24 22:32:59.607 | INFO     | src.pipelines.export:export_deals_to_csv:31 - Exported 25 deals to data\samples\deals.csv
+2026-09-24 22:32:59.608 | INFO     | src.pipelines.export:export_deals_to_json:15 - Exported 25 deals to data\samples\deals.json
+2026-09-24 22:36:09.737 | INFO     | src.extractors.asos:fetch_page_raw:61 - Fetching ASOS category 5775 | offset=0 limit=72 store=ROE country=BG
+2026-09-24 22:36:09.737 | DEBUG    | src.core.client:request:85 - [1/3] GET https://www.asos.com/api/product/search/v2/categories/5775
+2026-09-24 22:36:11.159 | INFO     | src.extractors.asos:iter_category:106 - Category 5775 contains total 1255 items.
+2026-09-24 22:36:11.827 | INFO     | src.extractors.asos:fetch_page_raw:61 - Fetching ASOS category 5775 | offset=72 limit=72 store=ROE country=BG
+2026-09-24 22:36:11.827 | DEBUG    | src.core.client:request:85 - [1/3] GET https://www.asos.com/api/product/search/v2/categories/5775
+2026-09-24 22:36:12.848 | INFO     | src.extractors.asos:iter_category:117 - Reached max requested items limit (144). Stopping.
+2026-09-24 22:36:12.856 | INFO     | src.pipelines.db:upsert_products:118 - Saved 144 products and price records into data\asos.db
+2026-09-24 22:36:12.873 | INFO     | src.pipelines.export:export_deals_to_csv:31 - Exported 49 unique deals to data\samples\deals.csv
+2026-09-24 22:36:12.874 | INFO     | src.pipelines.export:export_deals_to_json:15 - Exported 49 unique deals to data\samples\deals.json
+2026-09-24 22:36:12.875 | INFO     | src.pipelines.export:export_all_products_to_csv:56 - Exported 157 products to data\samples\all_products.csv
+2026-09-24 22:36:12.878 | INFO     | src.pipelines.export:export_all_products_to_json:40 - Exported 157 products to data\samples\all_products.json
+2026-09-24 22:36:21.282 | INFO     | src.extractors.asos:fetch_page_raw:61 - Fetching ASOS category 5775 | offset=0 limit=16 store=ROE country=BG
+2026-09-24 22:36:21.283 | DEBUG    | src.core.client:request:85 - [1/3] GET https://www.asos.com/api/product/search/v2/categories/5775
+2026-09-24 22:36:21.762 | INFO     | src.extractors.asos:iter_category:106 - Category 5775 contains total 1255 items.
+2026-09-24 22:36:21.762 | INFO     | src.extractors.asos:iter_category:117 - Reached max requested items limit (16). Stopping.
+2026-09-24 22:36:21.767 | INFO     | src.pipelines.db:upsert_products:118 - Saved 16 products and price records into data\asos.db
+2026-09-24 22:36:21.786 | INFO     | src.pipelines.export:export_deals_to_csv:31 - Exported 49 unique deals to data\samples\deals.csv
+2026-09-24 22:36:21.787 | INFO     | src.pipelines.export:export_deals_to_json:15 - Exported 49 unique deals to data\samples\deals.json
+2026-09-24 22:36:21.788 | INFO     | src.pipelines.export:export_all_products_to_csv:56 - Exported 157 products to data\samples\all_products.csv
+2026-09-24 22:36:21.791 | INFO     | src.pipelines.export:export_all_products_to_json:40 - Exported 157 products to data\samples\all_products.json
+2026-09-24 22:37:56.778 | INFO     | src.extractors.asos:fetch_page_raw:61 - Fetching ASOS category 5775 | offset=0 limit=72 store=ROE country=BG
+2026-09-24 22:37:56.778 | DEBUG    | src.core.client:request:85 - [1/3] GET https://www.asos.com/api/product/search/v2/categories/5775
+2026-09-24 22:37:57.876 | INFO     | src.extractors.asos:iter_category:106 - Category 5775 contains total 1255 items.
+2026-09-24 22:37:58.383 | INFO     | src.extractors.asos:fetch_page_raw:61 - Fetching ASOS category 5775 | offset=72 limit=72 store=ROE country=BG
+2026-09-24 22:37:58.384 | DEBUG    | src.core.client:request:85 - [1/3] GET https://www.asos.com/api/product/search/v2/categories/5775
+2026-09-24 22:37:59.885 | INFO     | src.extractors.asos:fetch_page_raw:61 - Fetching ASOS category 5775 | offset=144 limit=72 store=ROE country=BG
+2026-09-24 22:37:59.885 | DEBUG    | src.core.client:request:85 - [1/3] GET https://www.asos.com/api/product/search/v2/categories/5775
+2026-09-24 22:38:00.666 | INFO     | src.extractors.asos:iter_category:117 - Reached max requested items limit (216). Stopping.
+2026-09-24 22:38:00.721 | INFO     | src.pipelines.db:upsert_products:118 - Saved 216 products and price records into data\asos.db
+2026-09-24 22:38:00.740 | INFO     | src.pipelines.export:export_deals_to_csv:31 - Exported 73 unique deals to data\samples\deals.csv
+2026-09-24 22:38:00.741 | INFO     | src.pipelines.export:export_deals_to_json:15 - Exported 73 unique deals to data\samples\deals.json
+2026-09-24 22:38:00.743 | INFO     | src.pipelines.export:export_all_products_to_csv:56 - Exported 221 products to data\samples\all_products.csv
+2026-09-24 22:38:00.746 | INFO     | src.pipelines.export:export_all_products_to_json:40 - Exported 221 products to data\samples\all_products.json

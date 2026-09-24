@@ -1,0 +1,5 @@
+- [x] Categories glossary (docs/CATEGORIES.md, config/categories.py)
+- [x] Data output schema (docs/DATA_SCHEMA.md, src/models/product.py)
+- [x] E2E total products extraction (--all flag, multi-page pagination, auto-deduplication)
+- [x] Agents md creation (AGENTS.md)
+- [x] Notion project documentation (Page ID: 3e4d38fd-f310-816c-b5d8-d4422827d6bd)
