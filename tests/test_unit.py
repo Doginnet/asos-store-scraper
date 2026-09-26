@@ -138,3 +138,104 @@ def test_language_sanitization(monkeypatch: pytest.MonkeyPatch) -> None:
     extractor = AsosExtractor(lang="en_US.UTF-8")
     assert extractor.lang == "en-GB"
 
+
+@pytest.mark.unit
+def test_database_category_relations(tmp_path: Path) -> None:
+    """Test category mapping, isolation, and filtering in SQLite."""
+    from src.pipelines.db import AsosDatabase
+
+    test_db_path = tmp_path / "test_asos.db"
+    db = AsosDatabase(db_path=test_db_path)
+
+    # Mock products
+    trainer = AsosProduct.model_validate({
+        "id": 101,
+        "name": "Nike Air Max",
+        "productCode": 1001,
+        "brandName": "Nike",
+        "price": {
+            "current": {"value": 80.0},
+            "previous": {"value": 100.0},
+            "isMarkedDown": True,
+            "currency": "EUR"
+        },
+        "url": "/nike-air-max/prd/101",
+        "imageUrl": "https://images.asos-media.com/101.jpg"
+    })
+
+    hoodie = AsosProduct.model_validate({
+        "id": 202,
+        "name": "Adidas Oversized Hoodie",
+        "productCode": 2002,
+        "brandName": "Adidas",
+        "price": {
+            "current": {"value": 50.0},
+            "previous": {"value": 100.0},
+            "isMarkedDown": True,
+            "currency": "EUR"
+        },
+        "url": "/adidas-hoodie/prd/202",
+        "imageUrl": "https://images.asos-media.com/202.jpg"
+    })
+
+    # Upsert with category IDs
+    db.upsert_products([trainer], category_id=5775)
+    db.upsert_products([hoodie], category_id=5668)
+
+    # Check category product counts
+    cats = {c["id"]: c["product_count"] for c in db.get_categories()}
+    assert cats.get(5775) == 1
+    assert cats.get(5668) == 1
+
+    # Filtered deals
+    trainer_deals = db.get_top_deals(category_id=5775)
+    assert len(trainer_deals) == 1
+    assert trainer_deals[0]["id"] == 101
+
+    hoodie_deals = db.get_top_deals(category_id=5668)
+    assert len(hoodie_deals) == 1
+    assert hoodie_deals[0]["id"] == 202
+
+    # Global deals
+    all_deals = db.get_top_deals(category_id=None)
+    assert len(all_deals) == 2
+
+    # Filtered all products
+    trainer_products = db.get_all_products(category_id=5775)
+    assert len(trainer_products) == 1
+    assert trainer_products[0]["id"] == 101
+
+
+@pytest.mark.unit
+def test_category_and_global_exports(tmp_path: Path) -> None:
+    """Test exporting category samples and global summary files."""
+    import csv
+    from src.pipelines.export import export_category_samples, export_global_summary
+
+    sample_deals = [
+        {"id": 1, "name": "Item 1", "current_price": 50.0, "previous_price": 100.0, "discount_percent": 50.0}
+    ]
+    sample_products = [
+        {"id": 1, "name": "Item 1", "current_price": 50.0, "is_marked_down": 1}
+    ]
+
+    # Category export
+    cat_files = export_category_samples("test-slug", sample_deals, sample_products, base_dir=tmp_path)
+    assert cat_files["deals_csv"].exists()
+    assert cat_files["deals_json"].exists()
+    assert cat_files["products_csv"].exists()
+    assert cat_files["products_json"].exists()
+
+    with open(cat_files["deals_csv"], "r", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+        assert len(rows) == 1
+        assert rows[0]["id"] == "1"
+
+    # Global summary export
+    summary_files = export_global_summary(sample_deals, sample_products, summary_dir=tmp_path / "summary")
+    assert summary_files["deals_csv"].exists()
+    assert summary_files["deals_json"].exists()
+    assert summary_files["products_csv"].exists()
+    assert summary_files["products_json"].exists()
+
+

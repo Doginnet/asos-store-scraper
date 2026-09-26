@@ -12,6 +12,8 @@ from config.categories import AsosCategory, CATEGORY_REGISTRY, resolve_store_and
 from src.extractors.asos import AsosExtractor
 from src.pipelines.db import AsosDatabase
 from src.pipelines.export import (
+    export_category_samples,
+    export_global_summary,
     export_deals_to_csv,
     export_deals_to_json,
     export_all_products_to_csv,
@@ -30,13 +32,13 @@ if sys.platform.startswith("win"):
 console = Console(highlight=False)
 
 
-def display_deals_table(deals: list[dict], max_display: int = 15) -> None:
+def display_deals_table(deals: list[dict], max_display: int = 15, title_prefix: str = "ASOS") -> None:
     if not deals:
-        console.print("[yellow]No marked-down deals found in the current selection.[/yellow]")
+        console.print(f"[yellow]No marked-down deals found for {title_prefix}.[/yellow]")
         return
 
     table = Table(
-        title=f"[DEALS] ASOS Top Marked-Down Deals (Showing {min(len(deals), max_display)} of {len(deals)} unique deals)",
+        title=f"[DEALS] {title_prefix} Top Marked-Down Deals (Showing {min(len(deals), max_display)} of {len(deals)} unique deals)",
         show_header=True,
         header_style="bold magenta"
     )
@@ -94,6 +96,11 @@ def main() -> None:
         help="ASOS store code (default: auto-resolved from country)"
     )
     parser.add_argument(
+        "--db-per-category",
+        action="store_true",
+        help="Use a separate SQLite database file for this specific category (data/categories/<slug>.db)"
+    )
+    parser.add_argument(
         "--no-export",
         action="store_true",
         help="Skip exporting samples to CSV/JSON"
@@ -108,8 +115,11 @@ def main() -> None:
         store=args.store
     )
 
-    cat_info = CATEGORY_REGISTRY.get(args.category_id, {"title": f"Category {args.category_id}"})
-    console.print(f"[bold green]Starting ASOS scraper for: {cat_info['title']} (ID: {args.category_id})[/bold green]")
+    cat_info = CATEGORY_REGISTRY.get(args.category_id, {"slug": f"category_{args.category_id}", "title": f"Category {args.category_id}"})
+    cat_slug = cat_info.get("slug", f"category_{args.category_id}")
+    cat_title = cat_info.get("title", f"Category {args.category_id}")
+
+    console.print(f"[bold green]Starting ASOS scraper for: {cat_title} (ID: {args.category_id})[/bold green]")
     console.print(f"[dim]Store: {resolved_store} | Country: {resolved_country} | Currency: {resolved_currency}[/dim]")
     console.print(f"[dim]Batch limit: {args.limit} | Max items: {'ALL' if args.all else max_items}[/dim]\n")
 
@@ -118,7 +128,9 @@ def main() -> None:
         country=resolved_country,
         currency=resolved_currency
     )
-    db = AsosDatabase()
+
+    db_path = Path(f"data/categories/{cat_slug}.db") if args.db_per_category else settings.DB_PATH
+    db = AsosDatabase(db_path=db_path)
 
     collected_products = []
     try:
@@ -138,27 +150,42 @@ def main() -> None:
 
     console.print(f"\n[bold green]Successfully extracted {len(collected_products)} products.[/bold green]")
 
-    # Persist to database
-    db.upsert_products(collected_products)
+    # Persist to database linked to category
+    db.upsert_products(collected_products, category_id=args.category_id)
 
-    # Get deduplicated deals and all products
-    deals = db.get_top_deals(limit=100)
-    all_db_products = db.get_all_products()
+    # Category-specific deals and all category products
+    category_deals = db.get_top_deals(category_id=args.category_id, limit=100)
+    category_products = db.get_all_products(category_id=args.category_id)
 
-    # Display deduplicated deals
-    display_deals_table(deals, max_display=15)
+    # Display deduplicated deals for this category
+    display_deals_table(category_deals, max_display=15, title_prefix=cat_title)
 
-    # Export to samples
+    # Export to samples (category-specific folder + global summary)
     if not args.no_export:
-        deals_csv = export_deals_to_csv(deals)
-        deals_json = export_deals_to_json(deals)
-        all_csv = export_all_products_to_csv(all_db_products)
-        all_json = export_all_products_to_json(all_db_products)
-        
-        console.print(f"\n[cyan]Samples exported successfully:[/cyan]")
-        console.print(f" - [bold]Deals (Discounted only, {len(deals)} items):[/bold] {deals_csv} & {deals_json}")
-        console.print(f" - [bold]All Products ({len(all_db_products)} total in DB):[/bold] {all_csv} & {all_json}")
+        cat_exports = export_category_samples(
+            category_slug=cat_slug,
+            deals=category_deals,
+            products=category_products
+        )
+
+        global_deals = db.get_top_deals(category_id=None, limit=100)
+        global_products = db.get_all_products(category_id=None)
+        global_exports = export_global_summary(
+            all_deals=global_deals,
+            all_products=global_products
+        )
+
+        console.print(f"\n[cyan]Category samples exported ([bold]{cat_title}[/bold]):[/cyan]")
+        console.print(f" - [dim]Folder:[/dim] data/samples/{cat_slug}/")
+        console.print(f" - [bold]Deals ({len(category_deals)} items):[/bold] {cat_exports['deals_csv']}")
+        console.print(f" - [bold]Products ({len(category_products)} items):[/bold] {cat_exports['products_csv']}")
+
+        console.print(f"\n[cyan]Global catalog summary exported:[/cyan]")
+        console.print(f" - [dim]Folder:[/dim] data/samples/summary/ (and root data/samples/)")
+        console.print(f" - [bold]Global Deals ({len(global_deals)} items):[/bold] {global_exports['deals_csv']}")
+        console.print(f" - [bold]Total Products ({len(global_products)} total in DB):[/bold] {global_exports['products_csv']}")
 
 
 if __name__ == "__main__":
     main()
+

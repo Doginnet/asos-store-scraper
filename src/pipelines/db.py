@@ -1,15 +1,17 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from loguru import logger
 
 from config.settings import settings
+from config.categories import CATEGORY_REGISTRY
 
 
 class AsosDatabase:
     """
     SQLite persistence layer for ASOS catalog and historical price monitoring.
+    Supports relational category mapping and isolated category filtering.
     """
 
     def __init__(self, db_path: Optional[Path] = None):
@@ -54,25 +56,77 @@ class AsosDatabase:
             """)
 
             cursor.execute("""
+            CREATE TABLE IF NOT EXISTS categories (
+                id INTEGER PRIMARY KEY,
+                slug TEXT NOT NULL,
+                title TEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """)
+
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS product_categories (
+                product_id INTEGER NOT NULL,
+                category_id INTEGER NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (product_id, category_id),
+                FOREIGN KEY (product_id) REFERENCES products(id),
+                FOREIGN KEY (category_id) REFERENCES categories(id)
+            )
+            """)
+
+            cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_price_product ON price_history(product_id)
             """)
             cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_price_discount ON price_history(discount_percent DESC)
             """)
+            cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_pc_category ON product_categories(category_id)
+            """)
+
+            # Seed known categories from registry
+            for cat_id, info in CATEGORY_REGISTRY.items():
+                cursor.execute("""
+                INSERT OR IGNORE INTO categories (id, slug, title)
+                VALUES (?, ?, ?)
+                """, (cat_id, info["slug"], info["title"]))
+
+            # Backfill existing products to category 5775 (Trainers) if product_categories is empty
+            cursor.execute("SELECT count(*) FROM product_categories")
+            if cursor.fetchone()[0] == 0:
+                cursor.execute("""
+                INSERT OR IGNORE INTO product_categories (product_id, category_id)
+                SELECT id, 5775 FROM products
+                """)
+
             conn.commit()
 
-    def upsert_products(self, products: List[Any]) -> int:
+    def upsert_products(self, products: List[Any], category_id: Optional[int] = None) -> int:
         """
-        Upserts products into 'products' and appends a record to 'price_history'.
+        Upserts products into 'products', appends to 'price_history', and links to 'product_categories'.
         """
         if not products:
             return 0
 
         inserted_count = 0
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
 
         with self._get_connection() as conn:
             cursor = conn.cursor()
+
+            # Ensure category exists in categories table
+            if category_id is not None:
+                cat_info = CATEGORY_REGISTRY.get(category_id, {"slug": f"category_{category_id}", "title": f"Category {category_id}"})
+                cursor.execute("""
+                INSERT INTO categories (id, slug, title, updated_at)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    slug=excluded.slug,
+                    title=excluded.title,
+                    updated_at=excluded.updated_at
+                """, (category_id, cat_info["slug"], cat_info["title"], now))
+
             for p in products:
                 # Upsert into products
                 cursor.execute("""
@@ -111,18 +165,38 @@ class AsosDatabase:
                     p.price.currency,
                     now
                 ))
+
+                # Link product to category
+                if category_id is not None:
+                    cursor.execute("""
+                    INSERT OR IGNORE INTO product_categories (product_id, category_id, created_at)
+                    VALUES (?, ?, ?)
+                    """, (p.id, category_id, now))
+
                 inserted_count += 1
 
             conn.commit()
 
-        logger.info(f"Saved {inserted_count} products and price records into {self.db_path}")
+        logger.info(f"Saved {inserted_count} products and price records into {self.db_path} (category_id={category_id})")
         return inserted_count
 
-    def get_top_deals(self, limit: Optional[int] = 50) -> List[Dict[str, Any]]:
+    def get_top_deals(self, category_id: Optional[int] = None, limit: Optional[int] = 50) -> List[Dict[str, Any]]:
         """
         Returns top discounted products (deduplicated by latest price entry) sorted by discount_percent descending.
+        Optionally filtered by category_id.
         """
-        query = """
+        join_clause = ""
+        where_conditions = ["lp.is_marked_down = 1"]
+        params: List[Any] = []
+
+        if category_id is not None:
+            join_clause = "JOIN product_categories pc ON p.id = pc.product_id"
+            where_conditions.append("pc.category_id = ?")
+            params.append(category_id)
+
+        where_clause = " AND ".join(where_conditions)
+
+        query = f"""
         WITH latest_prices AS (
             SELECT 
                 product_id,
@@ -139,24 +213,34 @@ class AsosDatabase:
             lp.current_price, lp.previous_price, lp.discount_percent, lp.currency
         FROM products p
         JOIN latest_prices lp ON p.id = lp.product_id AND lp.rn = 1
-        WHERE lp.is_marked_down = 1
+        {join_clause}
+        WHERE {where_clause}
         ORDER BY lp.discount_percent DESC
         """
-        params = ()
         if limit is not None:
             query += " LIMIT ?"
-            params = (limit,)
+            params.append(limit)
 
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(query, params)
+            cursor.execute(query, tuple(params))
             return [dict(row) for row in cursor.fetchall()]
 
-    def get_all_products(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_all_products(self, category_id: Optional[int] = None, limit: Optional[int] = None) -> List[Dict[str, Any]]:
         """
         Returns all unique products from database with their latest recorded price.
+        Optionally filtered by category_id.
         """
-        query = """
+        join_clause = ""
+        where_clause = ""
+        params: List[Any] = []
+
+        if category_id is not None:
+            join_clause = "JOIN product_categories pc ON p.id = pc.product_id"
+            where_clause = "WHERE pc.category_id = ?"
+            params.append(category_id)
+
+        query = f"""
         WITH latest_prices AS (
             SELECT 
                 product_id,
@@ -173,15 +257,32 @@ class AsosDatabase:
             lp.current_price, lp.previous_price, lp.is_marked_down, lp.discount_percent, lp.currency
         FROM products p
         JOIN latest_prices lp ON p.id = lp.product_id AND lp.rn = 1
+        {join_clause}
+        {where_clause}
         ORDER BY p.id ASC
         """
-        params = ()
         if limit is not None:
             query += " LIMIT ?"
-            params = (limit,)
+            params.append(limit)
 
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute(query, params)
+            cursor.execute(query, tuple(params))
+            return [dict(row) for row in cursor.fetchall()]
+
+    def get_categories(self) -> List[Dict[str, Any]]:
+        """
+        Returns all registered categories with count of mapped products.
+        """
+        query = """
+        SELECT c.id, c.slug, c.title, count(pc.product_id) as product_count
+        FROM categories c
+        LEFT JOIN product_categories pc ON c.id = pc.category_id
+        GROUP BY c.id, c.slug, c.title
+        ORDER BY c.id ASC
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(query)
             return [dict(row) for row in cursor.fetchall()]
 
