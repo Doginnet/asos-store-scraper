@@ -96,6 +96,11 @@ def main() -> None:
         help="ASOS store code (default: auto-resolved from country)"
     )
     parser.add_argument(
+        "--all-categories",
+        action="store_true",
+        help="Scrape all registered ASOS categories in sequence"
+    )
+    parser.add_argument(
         "--db-per-category",
         action="store_true",
         help="Use a separate SQLite database file for this specific category (data/categories/<slug>.db)"
@@ -115,13 +120,11 @@ def main() -> None:
         store=args.store
     )
 
-    cat_info = CATEGORY_REGISTRY.get(args.category_id, {"slug": f"category_{args.category_id}", "title": f"Category {args.category_id}"})
-    cat_slug = cat_info.get("slug", f"category_{args.category_id}")
-    cat_title = cat_info.get("title", f"Category {args.category_id}")
+    categories_to_scrape = list(CATEGORY_REGISTRY.keys()) if args.all_categories else [args.category_id]
 
-    console.print(f"[bold green]Starting ASOS scraper for: {cat_title} (ID: {args.category_id})[/bold green]")
+    console.print(f"[bold green]Starting ASOS scraper for {len(categories_to_scrape)} category(ies)[/bold green]")
     console.print(f"[dim]Store: {resolved_store} | Country: {resolved_country} | Currency: {resolved_currency}[/dim]")
-    console.print(f"[dim]Batch limit: {args.limit} | Max items: {'ALL' if args.all else max_items}[/dim]\n")
+    console.print(f"[dim]Batch limit: {args.limit} | Items per category: {'ALL' if args.all else max_items}[/dim]\n")
 
     extractor = AsosExtractor(
         store=resolved_store,
@@ -129,61 +132,106 @@ def main() -> None:
         currency=resolved_currency
     )
 
-    db_path = Path(f"data/categories/{cat_slug}.db") if args.db_per_category else settings.DB_PATH
-    db = AsosDatabase(db_path=db_path)
+    category_results: list[dict] = []
 
-    collected_products = []
     try:
-        for product in extractor.iter_category(
-            category_id=args.category_id,
-            max_items=max_items,
-            limit=args.limit
-        ):
-            collected_products.append(product)
+        for idx, cat_id in enumerate(categories_to_scrape, 1):
+            cat_info = CATEGORY_REGISTRY.get(cat_id, {"slug": f"category_{cat_id}", "title": f"Category {cat_id}"})
+            cat_slug = cat_info.get("slug", f"category_{cat_id}")
+            cat_title = cat_info.get("title", f"Category {cat_id}")
 
-    except Exception as exc:
-        logger.error(f"Error during extraction: {exc}")
-        console.print(f"[bold red]Extraction failed:[/bold red] {exc}")
-        sys.exit(1)
+            console.print(f"[bold cyan][{idx}/{len(categories_to_scrape)}] Processing: {cat_title} (ID: {cat_id})[/bold cyan]")
+
+            db_path = Path(f"data/categories/{cat_slug}.db") if args.db_per_category else settings.DB_PATH
+            db = AsosDatabase(db_path=db_path)
+
+            collected_products = []
+            try:
+                for product in extractor.iter_category(
+                    category_id=cat_id,
+                    max_items=max_items,
+                    limit=args.limit
+                ):
+                    collected_products.append(product)
+            except Exception as exc:
+                logger.error(f"Error scraping category {cat_id}: {exc}")
+                console.print(f"[bold red]Failed to scrape {cat_title}:[/bold red] {exc}")
+                continue
+
+            # Persist to database linked to category
+            db.upsert_products(collected_products, category_id=cat_id)
+
+            category_deals = db.get_top_deals(category_id=cat_id, limit=100)
+            category_products = db.get_all_products(category_id=cat_id)
+
+            if not args.no_export:
+                cat_exports = export_category_samples(
+                    category_slug=cat_slug,
+                    deals=category_deals,
+                    products=category_products
+                )
+
+            category_results.append({
+                "id": cat_id,
+                "title": cat_title,
+                "slug": cat_slug,
+                "scraped_count": len(collected_products),
+                "total_in_db": len(category_products),
+                "deals_count": len(category_deals),
+                "max_discount": f"-{category_deals[0]['discount_percent']:.1f}%" if category_deals else "-"
+            })
+
+            console.print(f"  [green]Extracted {len(collected_products)} items | {len(category_deals)} deals found | Saved to data/samples/{cat_slug}/[/green]\n")
+
     finally:
         extractor.close()
 
-    console.print(f"\n[bold green]Successfully extracted {len(collected_products)} products.[/bold green]")
-
-    # Persist to database linked to category
-    db.upsert_products(collected_products, category_id=args.category_id)
-
-    # Category-specific deals and all category products
-    category_deals = db.get_top_deals(category_id=args.category_id, limit=100)
-    category_products = db.get_all_products(category_id=args.category_id)
-
-    # Display deduplicated deals for this category
-    display_deals_table(category_deals, max_display=15, title_prefix=cat_title)
-
-    # Export to samples (category-specific folder + global summary)
-    if not args.no_export:
-        cat_exports = export_category_samples(
-            category_slug=cat_slug,
-            deals=category_deals,
-            products=category_products
+    # Display overall category summary table if multiple categories scraped
+    if len(categories_to_scrape) > 1 and category_results:
+        summary_table = Table(
+            title="[CATALOG OVERVIEW] All Categories Scraping Summary",
+            show_header=True,
+            header_style="bold cyan"
         )
+        summary_table.add_column("ID", style="dim", width=8)
+        summary_table.add_column("Category", style="bold white")
+        summary_table.add_column("Scraped Now", justify="right", style="green")
+        summary_table.add_column("Total in DB", justify="right", style="magenta")
+        summary_table.add_column("Deals (Discounts)", justify="right", style="yellow")
+        summary_table.add_column("Top Discount", justify="right", style="bold red")
 
-        global_deals = db.get_top_deals(category_id=None, limit=100)
-        global_products = db.get_all_products(category_id=None)
+        for res in category_results:
+            summary_table.add_row(
+                str(res["id"]),
+                res["title"],
+                str(res["scraped_count"]),
+                str(res["total_in_db"]),
+                str(res["deals_count"]),
+                res["max_discount"]
+            )
+        console.print(summary_table)
+
+    # Display top deals table
+    target_cat = None if args.all_categories else args.category_id
+    title_pref = "All ASOS Categories" if args.all_categories else CATEGORY_REGISTRY.get(args.category_id, {}).get("title", "ASOS")
+    main_db = AsosDatabase()
+    all_deals = main_db.get_top_deals(category_id=target_cat, limit=100)
+    display_deals_table(all_deals, max_display=15, title_prefix=title_pref)
+
+    # Export global catalog summary
+    if not args.no_export:
+        global_deals = main_db.get_top_deals(category_id=None, limit=100)
+        global_products = main_db.get_all_products(category_id=None)
         global_exports = export_global_summary(
             all_deals=global_deals,
             all_products=global_products
         )
 
-        console.print(f"\n[cyan]Category samples exported ([bold]{cat_title}[/bold]):[/cyan]")
-        console.print(f" - [dim]Folder:[/dim] data/samples/{cat_slug}/")
-        console.print(f" - [bold]Deals ({len(category_deals)} items):[/bold] {cat_exports['deals_csv']}")
-        console.print(f" - [bold]Products ({len(category_products)} items):[/bold] {cat_exports['products_csv']}")
-
         console.print(f"\n[cyan]Global catalog summary exported:[/cyan]")
         console.print(f" - [dim]Folder:[/dim] data/samples/summary/ (and root data/samples/)")
         console.print(f" - [bold]Global Deals ({len(global_deals)} items):[/bold] {global_exports['deals_csv']}")
         console.print(f" - [bold]Total Products ({len(global_products)} total in DB):[/bold] {global_exports['products_csv']}")
+
 
 
 if __name__ == "__main__":

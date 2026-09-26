@@ -1,0 +1,74 @@
+[
+  {
+    "id": 209298329,
+    "name": "ASOS DESIGN skinny jeans in black",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-skinny-jeans-in-black/prd/209298329#colourWayId-209298336",
+    "image_url": "https://images.asos-media.com/products/asos-design-skinny-jeans-in-black/209298329-1-black",
+    "is_selling_fast": 0,
+    "current_price": 23.99,
+    "previous_price": 39.99,
+    "discount_percent": 40.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 209372390,
+    "name": "ASOS DESIGN skinny jeans in black wash",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-skinny-jeans-in-black-wash/prd/209372390#colourWayId-209372391",
+    "image_url": "https://images.asos-media.com/products/asos-design-skinny-jeans-in-black-wash/209372390-1-black",
+    "is_selling_fast": 0,
+    "current_price": 19.99,
+    "previous_price": 32.99,
+    "discount_percent": 39.4,
+    "currency": "EUR"
+  },
+  {
+    "id": 209001981,
+    "name": "ASOS DESIGN super skinny jeans in power stretch denim in washed black",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-super-skinny-jeans-in-power-stretch-denim-in-washed-black/prd/209001981#colourWayId-209001985",
+    "image_url": "https://images.asos-media.com/products/asos-design-super-skinny-jeans-in-power-stretch-denim-in-washed-black/209001981-1-washedblack",
+    "is_selling_fast": 0,
+    "current_price": 19.99,
+    "previous_price": 32.99,
+    "discount_percent": 39.4,
+    "currency": "EUR"
+  },
+  {
+    "id": 210976431,
+    "name": "JJ Rebel Noah straight jeans in grey wash",
+    "brand": "JJ Rebel",
+    "url": "https://www.asos.com/jj-rebel/jj-rebel-noah-straight-jeans-in-grey-wash/prd/210976431#colourWayId-210976443",
+    "image_url": "https://images.asos-media.com/products/jj-rebel-noah-straight-jeans-in-grey-wash/210976431-1-greydenim",
+    "is_selling_fast": 1,
+    "current_price": 14.99,
+    "previous_price": 19.99,
+    "discount_percent": 25.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 210400996,
+    "name": "Jack & Jones Alex baggy jeans in bleached black wash",
+    "brand": "Jack & Jones",
+    "url": "https://www.asos.com/jack-jones/jack-jones-alex-baggy-jeans-in-bleached-black-wash/prd/210400996#colourWayId-210401010",
+    "image_url": "https://images.asos-media.com/products/jack-jones-alex-baggy-jeans-in-bleached-black-wash/210400996-1-blackdenim",
+    "is_selling_fast": 0,
+    "current_price": 29.99,
+    "previous_price": 39.99,
+    "discount_percent": 25.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 210976039,
+    "name": "JJ Rebel Noah straight jeans in black",
+    "brand": "JJ Rebel",
+    "url": "https://www.asos.com/jj-rebel/jj-rebel-noah-straight-jeans-in-black/prd/210976039#colourWayId-210976044",
+    "image_url": "https://images.asos-media.com/products/jj-rebel-noah-straight-jeans-in-black/210976039-1-blackdenim",
+    "is_selling_fast": 1,
+    "current_price": 16.99,
+    "previous_price": 19.99,
+    "discount_percent": 15.0,
+    "currency": "EUR"
+  }
+]

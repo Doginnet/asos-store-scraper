@@ -12,6 +12,18 @@
     "currency": "EUR"
   },
   {
+    "id": 205633681,
+    "name": "ASOS DESIGN tapered cargo trouser in black",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-tapered-cargo-trouser-in-black/prd/205633681#colourWayId-205633682",
+    "image_url": "https://images.asos-media.com/products/asos-design-tapered-cargo-trouser-in-black/205633681-1-black",
+    "is_selling_fast": 1,
+    "current_price": 7.99,
+    "previous_price": 32.99,
+    "discount_percent": 75.8,
+    "currency": "EUR"
+  },
+  {
     "id": 209526451,
     "name": "New Look 1/4 zip funnel neck sweatshirt in mid grey 300gsm",
     "brand": "New Look",
@@ -33,6 +45,18 @@
     "current_price": 26.99,
     "previous_price": 109.99,
     "discount_percent": 75.5,
+    "currency": "EUR"
+  },
+  {
+    "id": 208777195,
+    "name": "ASOS DESIGN chelsea boots in black polish with square toe",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-chelsea-boots-in-black-polish-with-square-toe/prd/208777195#colourWayId-208777208",
+    "image_url": "https://images.asos-media.com/products/asos-design-chelsea-boots-in-black-polish-with-square-toe/208777195-1-black",
+    "is_selling_fast": 1,
+    "current_price": 16.24,
+    "previous_price": 64.99,
+    "discount_percent": 75.0,
     "currency": "EUR"
   },
   {
@@ -84,6 +108,18 @@
     "currency": "EUR"
   },
   {
+    "id": 210208099,
+    "name": "No Problemo x ASOS Exclusive 100% cotton logo t-shirt in brown stripe",
+    "brand": "No Problemo",
+    "url": "https://www.asos.com/no-problemo/no-problemo-x-asos-exclusive-100-cotton-logo-t-shirt-in-brown-stripe/prd/210208099#colourWayId-210208108",
+    "image_url": "https://images.asos-media.com/products/no-problemo-x-asos-exclusive-100-cotton-logo-t-shirt-in-brown-stripe/210208099-1-brown",
+    "is_selling_fast": 0,
+    "current_price": 16.99,
+    "previous_price": 67.0,
+    "discount_percent": 74.6,
+    "currency": "EUR"
+  },
+  {
     "id": 209612713,
     "name": "adidas Originals Adizero Adios OG in white and green",
     "brand": "adidas Originals",
@@ -93,6 +129,18 @@
     "current_price": 33.99,
     "previous_price": 130.0,
     "discount_percent": 73.9,
+    "currency": "EUR"
+  },
+  {
+    "id": 208066045,
+    "name": "ASOS DESIGN slim chinos in navy",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-slim-chinos-in-navy/prd/208066045#colourWayId-208066048",
+    "image_url": "https://images.asos-media.com/products/asos-design-slim-chinos-in-navy/208066045-1-navy",
+    "is_selling_fast": 0,
+    "current_price": 8.99,
+    "previous_price": 32.99,
+    "discount_percent": 72.7,
     "currency": "EUR"
   },
   {
@@ -152,6 +200,18 @@
     "is_selling_fast": 0,
     "current_price": 32.99,
     "previous_price": 109.99,
+    "discount_percent": 70.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 208884082,
+    "name": "ASOS DESIGN lace up worker boots in brown leather",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-lace-up-worker-boots-in-brown-leather/prd/208884082#colourWayId-208884083",
+    "image_url": "https://images.asos-media.com/products/asos-design-lace-up-worker-boots-in-brown-leather/208884082-1-brown",
+    "is_selling_fast": 0,
+    "current_price": 20.99,
+    "previous_price": 69.99,
     "discount_percent": 70.0,
     "currency": "EUR"
   },
@@ -261,6 +321,18 @@
     "current_price": 45.99,
     "previous_price": 130.0,
     "discount_percent": 64.6,
+    "currency": "EUR"
+  },
+  {
+    "id": 210260347,
+    "name": "ASOS DESIGN tailored cotton rich slim chino trousers in stone with turnup",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-tailored-cotton-rich-slim-chino-trousers-in-stone-with-turnup/prd/210260347#colourWayId-210260348",
+    "image_url": "https://images.asos-media.com/products/asos-design-tailored-cotton-rich-slim-chino-trousers-in-stone-with-turnup/210260347-1-stone",
+    "is_selling_fast": 0,
+    "current_price": 15.99,
+    "previous_price": 44.99,
+    "discount_percent": 64.5,
     "currency": "EUR"
   },
   {
@@ -660,6 +732,18 @@
     "currency": "EUR"
   },
   {
+    "id": 209183955,
+    "name": "ASOS DESIGN lace up boots in black leather on cleated sole",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-lace-up-boots-in-black-leather-on-cleated-sole/prd/209183955#colourWayId-209183969",
+    "image_url": "https://images.asos-media.com/products/asos-design-lace-up-boots-in-black-leather-on-cleated-sole/209183955-1-black",
+    "is_selling_fast": 1,
+    "current_price": 33.99,
+    "previous_price": 74.99,
+    "discount_percent": 54.7,
+    "currency": "EUR"
+  },
+  {
     "id": 208080425,
     "name": "Nike T90 unisex trainers in black",
     "brand": "Nike",
@@ -752,6 +836,18 @@
     "is_selling_fast": 0,
     "current_price": 39.99,
     "previous_price": 79.99,
+    "discount_percent": 50.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 207383514,
+    "name": "ASOS DESIGN smart oversized tapered trousers with double pleats and back pocket detail in stone",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-smart-oversized-tapered-trousers-with-double-pleats-and-back-pocket-detail-in-stone/prd/207383514#colourWayId-207383527",
+    "image_url": "https://images.asos-media.com/products/asos-design-smart-oversized-tapered-trousers-with-double-pleats-and-back-pocket-detail-in-stone/207383514-1-blue",
+    "is_selling_fast": 0,
+    "current_price": 22.49,
+    "previous_price": 44.99,
     "discount_percent": 50.0,
     "currency": "EUR"
   },
@@ -884,6 +980,42 @@
     "is_selling_fast": 0,
     "current_price": 49.99,
     "previous_price": 100.0,
+    "discount_percent": 50.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 208992604,
+    "name": "ASOS DESIGN chunky lace up boot in black",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-chunky-lace-up-boot-in-black/prd/208992604#colourWayId-208992609",
+    "image_url": "https://images.asos-media.com/products/asos-design-chunky-lace-up-boot-in-black/208992604-1-black",
+    "is_selling_fast": 0,
+    "current_price": 32.49,
+    "previous_price": 64.99,
+    "discount_percent": 50.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 209044737,
+    "name": "ASOS DESIGN pull on chelsea boot in grey with distressing and gold hardware",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-pull-on-chelsea-boot-in-grey-with-distressing-and-gold-hardware/prd/209044737#colourWayId-209044740",
+    "image_url": "https://images.asos-media.com/products/asos-design-pull-on-chelsea-boot-in-grey-with-distressing-and-gold-hardware/209044737-1-grey",
+    "is_selling_fast": 0,
+    "current_price": 37.49,
+    "previous_price": 74.99,
+    "discount_percent": 50.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 209182580,
+    "name": "Hunter Unisex single set gloves in khaki",
+    "brand": "Hunter",
+    "url": "https://www.asos.com/hunter/hunter-unisex-single-set-gloves-in-khaki/prd/209182580#colourWayId-209182583",
+    "image_url": "https://images.asos-media.com/products/hunter-unisex-single-set-gloves-in-khaki/209182580-1-black",
+    "is_selling_fast": 0,
+    "current_price": 12.5,
+    "previous_price": 25.0,
     "discount_percent": 50.0,
     "currency": "EUR"
   },
@@ -1065,138 +1197,6 @@
     "current_price": 65.49,
     "previous_price": 130.99,
     "discount_percent": 50.0,
-    "currency": "EUR"
-  },
-  {
-    "id": 202556355,
-    "name": "Converse Chuck 70 Hi trainers in stone",
-    "brand": "Converse",
-    "url": "https://www.asos.com/converse/converse-chuck-70-hi-trainers-in-stone/prd/202556355#colourWayId-202556356",
-    "image_url": "https://images.asos-media.com/products/converse-chuck-70-hi-trainers-in-stone/202556355-1-ivory",
-    "is_selling_fast": 0,
-    "current_price": 47.99,
-    "previous_price": 95.0,
-    "discount_percent": 49.5,
-    "currency": "EUR"
-  },
-  {
-    "id": 207471196,
-    "name": "New Balance 471 trainers in light brown and beige",
-    "brand": "New Balance",
-    "url": "https://www.asos.com/new-balance/new-balance-471-trainers-in-light-brown-and-beige/prd/207471196#colourWayId-207471197",
-    "image_url": "https://images.asos-media.com/products/new-balance-471-trainers-in-light-brown-and-beige/207471196-1-beige",
-    "is_selling_fast": 0,
-    "current_price": 66.8,
-    "previous_price": 130.99,
-    "discount_percent": 49.0,
-    "currency": "EUR"
-  },
-  {
-    "id": 12770085,
-    "name": "Diesel S-Asticio high top trainers with stitching detail in black",
-    "brand": "Diesel",
-    "url": "https://www.asos.com/diesel/diesel-s-asticio-high-top-trainers-with-stitching-detail-in-black/prd/12770085#colourWayId-16416066",
-    "image_url": null,
-    "is_selling_fast": 0,
-    "current_price": 60.99,
-    "previous_price": 117.99,
-    "discount_percent": 48.3,
-    "currency": "EUR"
-  },
-  {
-    "id": 209234150,
-    "name": "New Balance TRN trainers in grey",
-    "brand": "New Balance",
-    "url": "https://www.asos.com/new-balance/new-balance-trn-trainers-in-grey/prd/209234150#colourWayId-209234156",
-    "image_url": "https://images.asos-media.com/products/new-balance-trn-trainers-in-grey/209234150-1-grey",
-    "is_selling_fast": 0,
-    "current_price": 84.99,
-    "previous_price": 160.0,
-    "discount_percent": 46.9,
-    "currency": "EUR"
-  },
-  {
-    "id": 208575882,
-    "name": "adidas Running Supernova Rise 2 trainers in black",
-    "brand": "adidas performance",
-    "url": "https://www.asos.com/adidas-performance/adidas-running-supernova-rise-2-trainers-in-black/prd/208575882#colourWayId-208575894",
-    "image_url": "https://images.asos-media.com/products/adidas-running-supernova-rise-2-trainers-in-black/208575882-1-black",
-    "is_selling_fast": 0,
-    "current_price": 79.99,
-    "previous_price": 150.0,
-    "discount_percent": 46.7,
-    "currency": "EUR"
-  },
-  {
-    "id": 209608636,
-    "name": "Fred Perry B11 suede & leather trainer in white and green",
-    "brand": "Fred Perry",
-    "url": "https://www.asos.com/fred-perry/fred-perry-b11-suede-leather-trainer-in-white-and-green/prd/209608636#colourWayId-209608647",
-    "image_url": "https://images.asos-media.com/products/fred-perry-b11-suede-leather-trainer-in-white-and-green/209608636-1-white",
-    "is_selling_fast": 0,
-    "current_price": 74.99,
-    "previous_price": 140.0,
-    "discount_percent": 46.4,
-    "currency": "EUR"
-  },
-  {
-    "id": 209348254,
-    "name": "adidas Originals Japan decon trainers in cream with pink 3 stripe",
-    "brand": "adidas Originals",
-    "url": "https://www.asos.com/adidas-originals/adidas-originals-japan-decon-trainers-in-cream-with-pink-3-stripe/prd/209348254#colourWayId-209348255",
-    "image_url": "https://images.asos-media.com/products/adidas-originals-japan-decon-trainers-in-cream-with-pink-3-stripe/209348254-1-white",
-    "is_selling_fast": 0,
-    "current_price": 69.99,
-    "previous_price": 130.0,
-    "discount_percent": 46.2,
-    "currency": "EUR"
-  },
-  {
-    "id": 209815450,
-    "name": "New Balance 5030 trainers in black and purple",
-    "brand": "New Balance",
-    "url": "https://www.asos.com/new-balance/new-balance-5030-trainers-in-black-and-purple/prd/209815450#colourWayId-209815453",
-    "image_url": "https://images.asos-media.com/products/new-balance-5030-trainers-in-black-and-purple/209815450-1-black",
-    "is_selling_fast": 1,
-    "current_price": 69.99,
-    "previous_price": 130.0,
-    "discount_percent": 46.2,
-    "currency": "EUR"
-  },
-  {
-    "id": 203984649,
-    "name": "adidas Originals Campus 00s trainers in red",
-    "brand": "adidas Originals",
-    "url": "https://www.asos.com/adidas-originals/adidas-originals-campus-00s-trainers-in-red/prd/203984649#colourWayId-203984650",
-    "image_url": "https://images.asos-media.com/products/adidas-originals-campus-00s-trainers-in-red/203984649-1-red",
-    "is_selling_fast": 0,
-    "current_price": 64.99,
-    "previous_price": 120.0,
-    "discount_percent": 45.8,
-    "currency": "EUR"
-  },
-  {
-    "id": 209194075,
-    "name": "Nike Air Force '07 1 trainers in off white and black",
-    "brand": "Nike",
-    "url": "https://www.asos.com/nike/nike-air-force-07-1-trainers-in-off-white-and-black/prd/209194075#colourWayId-209194076",
-    "image_url": "https://images.asos-media.com/products/nike-air-force-07-1-trainers-in-off-white-and-black/209194075-1-white",
-    "is_selling_fast": 0,
-    "current_price": 64.99,
-    "previous_price": 119.99,
-    "discount_percent": 45.8,
-    "currency": "EUR"
-  },
-  {
-    "id": 209815478,
-    "name": "New Balance 740 trainers in black and yellow",
-    "brand": "New Balance",
-    "url": "https://www.asos.com/new-balance/new-balance-740-trainers-in-black-and-yellow/prd/209815478#colourWayId-209815480",
-    "image_url": "https://images.asos-media.com/products/new-balance-740-trainers-in-black-and-yellow/209815478-1-black",
-    "is_selling_fast": 0,
-    "current_price": 64.99,
-    "previous_price": 120.0,
-    "discount_percent": 45.8,
     "currency": "EUR"
   }
 ]
