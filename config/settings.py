@@ -50,8 +50,13 @@ class Settings(BaseSettings):
     SAMPLES_DIR: Path = Path("data/samples")
     RAW_DIR: Path = Path("data/raw")
     LOGS_DIR: Path = Path("logs")
-
     HEADLESS: bool = True
+
+    # Telegram Alerting Skeleton (tokens optional in .env)
+    TELEGRAM_BOT_TOKEN: str | None = None
+    TELEGRAM_CHAT_ID: str | None = None
+    ALERT_MIN_DISCOUNT_PERCENT: float = 60.0
+
 
 
 settings = Settings()

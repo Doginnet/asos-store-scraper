@@ -239,3 +239,29 @@ def test_category_and_global_exports(tmp_path: Path) -> None:
     assert summary_files["products_json"].exists()
 
 
+@pytest.mark.unit
+def test_telegram_alerter_mock_mode() -> None:
+    """Ensure TelegramAlerter operates smoothly in mock mode without credentials."""
+    from src.alerts.telegram import TelegramAlerter
+
+    alerter = TelegramAlerter(bot_token="", chat_id="", min_discount=50.0)
+    assert not alerter.is_configured
+
+    deals = [
+        {"id": 1, "name": "Super Discount Item", "brand": "Nike", "current_price": 40.0, "previous_price": 100.0, "discount_percent": 60.0, "currency": "EUR", "url": "https://www.asos.com/1"},
+        {"id": 2, "name": "Low Discount Item", "brand": "Puma", "current_price": 80.0, "previous_price": 100.0, "discount_percent": 20.0, "currency": "EUR", "url": "https://www.asos.com/2"},
+    ]
+
+    dispatched = alerter.notify_deals(deals)
+    assert dispatched == 1
+
+    # Test single alert formatting
+    msg = alerter.format_deal_message(deals[0])
+    assert "Super Discount Item" in msg
+    assert "Nike" in msg
+    assert "-60.0%" in msg
+    assert "40.00 EUR" in msg
+    assert "100.00 EUR" in msg
+
+
+

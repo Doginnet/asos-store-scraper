@@ -110,6 +110,11 @@ def main() -> None:
         action="store_true",
         help="Skip exporting samples to CSV/JSON"
     )
+    parser.add_argument(
+        "--notify",
+        action="store_true",
+        help="Trigger Telegram deal alerts (runs in simulation/mock mode if tokens not set)"
+    )
 
     args = parser.parse_args()
 
@@ -232,6 +237,13 @@ def main() -> None:
         console.print(f" - [bold]Global Deals ({len(global_deals)} items):[/bold] {global_exports['deals_csv']}")
         console.print(f" - [bold]Total Products ({len(global_products)} total in DB):[/bold] {global_exports['products_csv']}")
 
+    # Telegram alerting
+    if args.notify:
+        from src.alerts.telegram import TelegramAlerter
+        alerter = TelegramAlerter()
+        dispatched = alerter.notify_deals(all_deals)
+        mode_str = "Live Mode" if alerter.is_configured else "Mock / Simulation Mode"
+        console.print(f"\n[cyan]Telegram Deal Alerts ({mode_str}):[/cyan] Processed [bold]{dispatched}[/bold] alert(s) (threshold >= {alerter.min_discount}%).")
 
 
 if __name__ == "__main__":

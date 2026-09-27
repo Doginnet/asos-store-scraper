@@ -473,7 +473,7 @@
     "brand": "Nike",
     "url": "https://www.asos.com/nike/nike-ava-rover-trainers-in-grey-and-yellow/prd/209194134#colourWayId-209194146",
     "image_url": "https://images.asos-media.com/products/nike-ava-rover-trainers-in-grey-and-yellow/209194134-1-grey",
-    "is_selling_fast": 0,
+    "is_selling_fast": 1,
     "current_price": 59.99,
     "previous_price": 139.99,
     "discount_percent": 57.1,
@@ -665,7 +665,7 @@
     "brand": "adidas Originals",
     "url": "https://www.asos.com/adidas-originals/adidas-originals-superstar-ii-trainers-in-grey-and-white/prd/209613205#colourWayId-209613210",
     "image_url": "https://images.asos-media.com/products/adidas-originals-superstar-ii-trainers-in-grey-and-white/209613205-1-grey",
-    "is_selling_fast": 0,
+    "is_selling_fast": 1,
     "current_price": 54.99,
     "previous_price": 120.0,
     "discount_percent": 54.2,
@@ -677,7 +677,7 @@
     "brand": "adidas Originals",
     "url": "https://www.asos.com/adidas-originals/adidas-originals-gazelle-bold-trainers-in-black-and-white-fuzzy/prd/208607060#colourWayId-208607092",
     "image_url": "https://images.asos-media.com/products/adidas-originals-gazelle-bold-trainers-in-black-and-white-fuzzy/208607060-1-black",
-    "is_selling_fast": 1,
+    "is_selling_fast": 0,
     "current_price": 59.99,
     "previous_price": 130.0,
     "discount_percent": 53.9,
@@ -773,7 +773,7 @@
     "brand": "adidas Originals",
     "url": "https://www.asos.com/adidas-originals/adidas-originals-adizero-aruku-trainers-in-white/prd/207517678#colourWayId-207517682",
     "image_url": "https://images.asos-media.com/products/adidas-originals-adizero-aruku-trainers-in-white/207517678-1-white",
-    "is_selling_fast": 0,
+    "is_selling_fast": 1,
     "current_price": 69.99,
     "previous_price": 140.0,
     "discount_percent": 50.0,
@@ -1056,6 +1056,18 @@
     "currency": "EUR"
   },
   {
+    "id": 208140967,
+    "name": "New Balance 471 unisex trainers in black and beige",
+    "brand": "New Balance",
+    "url": "https://www.asos.com/new-balance/new-balance-471-unisex-trainers-in-black-and-beige/prd/208140967#colourWayId-208140980",
+    "image_url": "https://images.asos-media.com/products/new-balance-471-unisex-trainers-in-black-and-beige/208140967-1-black",
+    "is_selling_fast": 0,
+    "current_price": 49.99,
+    "previous_price": 100.0,
+    "discount_percent": 50.0,
+    "currency": "EUR"
+  },
+  {
     "id": 202556355,
     "name": "Converse Chuck 70 Hi trainers in stone",
     "brand": "Converse",
@@ -1077,6 +1089,18 @@
     "current_price": 66.8,
     "previous_price": 130.99,
     "discount_percent": 49.0,
+    "currency": "EUR"
+  },
+  {
+    "id": 209788213,
+    "name": "ASOS DESIGN trainers with panelling in navy and grey",
+    "brand": "ASOS DESIGN",
+    "url": "https://www.asos.com/asos-design/asos-design-trainers-with-panelling-in-navy-and-grey/prd/209788213#colourWayId-209788217",
+    "image_url": "https://images.asos-media.com/products/asos-design-trainers-with-panelling-in-navy-and-grey/209788213-1-whitenavy",
+    "is_selling_fast": 0,
+    "current_price": 22.99,
+    "previous_price": 44.99,
+    "discount_percent": 48.9,
     "currency": "EUR"
   },
   {
@@ -1145,7 +1169,7 @@
     "brand": "New Balance",
     "url": "https://www.asos.com/new-balance/new-balance-5030-trainers-in-black-and-purple/prd/209815450#colourWayId-209815453",
     "image_url": "https://images.asos-media.com/products/new-balance-5030-trainers-in-black-and-purple/209815450-1-black",
-    "is_selling_fast": 1,
+    "is_selling_fast": 0,
     "current_price": 69.99,
     "previous_price": 130.0,
     "discount_percent": 46.2,
@@ -1172,30 +1196,6 @@
     "is_selling_fast": 0,
     "current_price": 64.99,
     "previous_price": 119.99,
-    "discount_percent": 45.8,
-    "currency": "EUR"
-  },
-  {
-    "id": 209815478,
-    "name": "New Balance 740 trainers in black and yellow",
-    "brand": "New Balance",
-    "url": "https://www.asos.com/new-balance/new-balance-740-trainers-in-black-and-yellow/prd/209815478#colourWayId-209815480",
-    "image_url": "https://images.asos-media.com/products/new-balance-740-trainers-in-black-and-yellow/209815478-1-black",
-    "is_selling_fast": 0,
-    "current_price": 64.99,
-    "previous_price": 120.0,
-    "discount_percent": 45.8,
-    "currency": "EUR"
-  },
-  {
-    "id": 210251656,
-    "name": "adidas Originals Ghostsprint trainers in off white",
-    "brand": "adidas Originals",
-    "url": "https://www.asos.com/adidas-originals/adidas-originals-ghostsprint-trainers-in-off-white/prd/210251656#colourWayId-210251660",
-    "image_url": "https://images.asos-media.com/products/adidas-originals-ghostsprint-trainers-in-off-white/210251656-1-white",
-    "is_selling_fast": 1,
-    "current_price": 64.99,
-    "previous_price": 120.0,
     "discount_percent": 45.8,
     "currency": "EUR"
   }
