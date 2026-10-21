@@ -264,4 +264,71 @@ def test_telegram_alerter_mock_mode() -> None:
     assert "100.00 EUR" in msg
 
 
+@pytest.mark.unit
+def test_lifecycle_tracking_and_deactivation(tmp_path: Path) -> None:
+    """Verify last_seen_at updates, is_active flag, and automatic deactivation."""
+    import time
+    from datetime import datetime, timezone
+    from src.pipelines.db import AsosDatabase
+    from src.models import AsosProduct
+
+    db_path = tmp_path / "lifecycle_test.db"
+    db = AsosDatabase(db_path=db_path)
+
+    p1 = AsosProduct.model_validate({
+        "id": 901,
+        "name": "Product 1",
+        "productCode": 90100,
+        "brandName": "Brand A",
+        "url": "https://www.asos.com/prod1",
+        "price": {"current": {"value": 50.0}}
+    })
+    p2 = AsosProduct.model_validate({
+        "id": 902,
+        "name": "Product 2",
+        "productCode": 90200,
+        "brandName": "Brand B",
+        "url": "https://www.asos.com/prod2",
+        "price": {"current": {"value": 80.0}}
+    })
+
+    # Scrape 1: Both products found
+    db.upsert_products([p1, p2], category_id=5775)
+
+    active_prods = db.get_all_products(category_id=5775, active_only=True)
+    assert len(active_prods) == 2
+    for p in active_prods:
+        assert p["is_active"] == 1
+        assert p["last_seen_at"] is not None
+
+    time.sleep(0.05)
+    crawl_2_start = datetime.now(timezone.utc).isoformat()
+    time.sleep(0.05)
+
+    # Scrape 2: Only Product 1 is seen (Product 2 is missing/out of stock)
+    db.upsert_products([p1], category_id=5775)
+
+    # Deactivate unseen products for category 5775
+    deactivated = db.deactivate_unseen_products(category_id=5775, scrape_start_time=crawl_2_start)
+    assert deactivated == 1
+
+    # Active only returns Product 1
+    active_after = db.get_all_products(category_id=5775, active_only=True)
+    assert len(active_after) == 1
+    assert active_after[0]["id"] == 901
+
+    # All products returns both, but Product 2 is inactive
+    all_after = db.get_all_products(category_id=5775, active_only=False)
+    assert len(all_after) == 2
+    p2_record = next(p for p in all_after if p["id"] == 902)
+    assert p2_record["is_active"] == 0
+
+    # Categories list reflects active count vs total count
+    cats = db.get_categories()
+    cat_5775 = next(c for c in cats if c["id"] == 5775)
+    assert cat_5775["product_count"] == 2
+    assert cat_5775["active_count"] == 1
+
+
+
 

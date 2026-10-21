@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime, timezone
 import sys
 from pathlib import Path
 from rich.console import Console
@@ -8,7 +9,7 @@ from rich.table import Table
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config.settings import settings
-from config.categories import AsosCategory, CATEGORY_REGISTRY, resolve_store_and_currency
+from config.categories import AsosCategory, CATEGORY_REGISTRY, resolve_store_and_currency, resolve_category
 from src.extractors.asos import AsosExtractor
 from src.pipelines.db import AsosDatabase
 from src.pipelines.export import (
@@ -61,10 +62,11 @@ def display_deals_table(deals: list[dict], max_display: int = 15, title_prefix: 
 def main() -> None:
     parser = argparse.ArgumentParser(description="ASOS E-commerce Catalog Extractor & Price Monitor")
     parser.add_argument(
-        "--category-id", "-c",
-        type=int,
-        default=AsosCategory.TRAINERS,
-        help="ASOS category ID (default: 5775 for Trainers)"
+        "--category", "--category-id", "-c",
+        dest="category",
+        type=str,
+        default="trainers",
+        help="ASOS category ID or slug (e.g. 5775, 4209, trainers, shoes, hoodies; default: trainers)"
     )
     parser.add_argument(
         "--limit", "-l",
@@ -125,7 +127,13 @@ def main() -> None:
         store=args.store
     )
 
-    categories_to_scrape = list(CATEGORY_REGISTRY.keys()) if args.all_categories else [args.category_id]
+    try:
+        resolved_category_id = resolve_category(args.category)
+    except ValueError as exc:
+        console.print(f"[bold red]Configuration error:[/bold red] {exc}")
+        sys.exit(1)
+
+    categories_to_scrape = list(CATEGORY_REGISTRY.keys()) if args.all_categories else [resolved_category_id]
 
     console.print(f"[bold green]Starting ASOS scraper for {len(categories_to_scrape)} category(ies)[/bold green]")
     console.print(f"[dim]Store: {resolved_store} | Country: {resolved_country} | Currency: {resolved_currency}[/dim]")
@@ -149,6 +157,7 @@ def main() -> None:
 
             db_path = Path(f"data/categories/{cat_slug}.db") if args.db_per_category else settings.DB_PATH
             db = AsosDatabase(db_path=db_path)
+            scrape_start_time = datetime.now(timezone.utc).isoformat()
 
             collected_products = []
             try:
@@ -166,6 +175,16 @@ def main() -> None:
             # Persist to database linked to category
             db.upsert_products(collected_products, category_id=cat_id)
 
+            # Lifecycle tracking: deactivate items no longer returned by ASOS during a full crawl
+            deactivated_count = 0
+            if args.all and collected_products:
+                deactivated_count = db.deactivate_unseen_products(
+                    category_id=cat_id,
+                    scrape_start_time=scrape_start_time
+                )
+                if deactivated_count > 0:
+                    console.print(f"  [yellow]Lifecycle:[/yellow] Deactivated {deactivated_count} items no longer found on ASOS")
+
             category_deals = db.get_top_deals(category_id=cat_id, limit=100)
             category_products = db.get_all_products(category_id=cat_id)
 
@@ -182,11 +201,13 @@ def main() -> None:
                 "slug": cat_slug,
                 "scraped_count": len(collected_products),
                 "total_in_db": len(category_products),
+                "deactivated_count": deactivated_count,
                 "deals_count": len(category_deals),
                 "max_discount": f"-{category_deals[0]['discount_percent']:.1f}%" if category_deals else "-"
             })
 
-            console.print(f"  [green]Extracted {len(collected_products)} items | {len(category_deals)} deals found | Saved to data/samples/{cat_slug}/[/green]\n")
+            lifecycle_msg = f" | Deactivated: {deactivated_count}" if deactivated_count > 0 else ""
+            console.print(f"  [green]Extracted {len(collected_products)} items | Active in DB: {len(category_products)}{lifecycle_msg} | {len(category_deals)} deals found | Saved to data/samples/{cat_slug}/[/green]\n")
 
     finally:
         extractor.close()
@@ -201,7 +222,8 @@ def main() -> None:
         summary_table.add_column("ID", style="dim", width=8)
         summary_table.add_column("Category", style="bold white")
         summary_table.add_column("Scraped Now", justify="right", style="green")
-        summary_table.add_column("Total in DB", justify="right", style="magenta")
+        summary_table.add_column("Active in DB", justify="right", style="magenta")
+        summary_table.add_column("Deactivated", justify="right", style="cyan")
         summary_table.add_column("Deals (Discounts)", justify="right", style="yellow")
         summary_table.add_column("Top Discount", justify="right", style="bold red")
 
@@ -211,6 +233,7 @@ def main() -> None:
                 res["title"],
                 str(res["scraped_count"]),
                 str(res["total_in_db"]),
+                str(res.get("deactivated_count", 0)),
                 str(res["deals_count"]),
                 res["max_discount"]
             )

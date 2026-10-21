@@ -67,10 +67,16 @@ with st.sidebar:
     categories_data = db.get_categories()
     category_options = {"All Categories": None}
     for c in categories_data:
-        category_options[f"{c['title']} ({c['product_count']})"] = c["id"]
+        act = c.get("active_count", c["product_count"])
+        tot = c["product_count"]
+        label = f"{c['title']} ({act:,} active / {tot:,} total)" if act != tot else f"{c['title']} ({tot:,})"
+        category_options[label] = c["id"]
 
     selected_cat_label = st.selectbox("Category", list(category_options.keys()))
     selected_cat_id = category_options[selected_cat_label]
+
+    # Lifecycle filter
+    show_active_only = st.checkbox("✅ Show active products only", value=True, help="Uncheck to inspect historical delisted / out-of-stock items")
 
     # Minimum discount filter
     min_discount = st.slider("Minimum Discount (%)", min_value=0, max_value=90, value=20, step=5)
@@ -82,7 +88,7 @@ with st.sidebar:
     only_selling_fast = st.checkbox("🔥 Only 'Selling Fast' items", value=False)
 
     # Search keyword
-    search_query = st.text_input("🔍 Search by product name or brand", placeholder="e.g. Nike, hoodie...")
+    search_query = st.text_input("🔍 Search by product name or brand", placeholder="e.g. Nike, adidas, boots...")
 
     st.divider()
     if st.button("🔄 Refresh Data", use_container_width=True):
@@ -96,15 +102,15 @@ with st.sidebar:
 
 # --- DATA RETRIEVAL ---
 @st.cache_data(ttl=60)
-def load_data(category_id: int | None):
-    products = db.get_all_products(category_id=category_id)
+def load_data(category_id: int | None, active_only: bool = True):
+    products = db.get_all_products(category_id=category_id, active_only=active_only)
     if not products:
         return pd.DataFrame()
     df = pd.DataFrame(products)
     return df
 
 
-df = load_data(selected_cat_id)
+df = load_data(selected_cat_id, active_only=show_active_only)
 
 if df.empty:
     st.warning("No products found in the database. Run the scraper first with: `uv run python -m src.main --all-categories`")
@@ -141,11 +147,18 @@ with st.sidebar:
 col1, col2, col3, col4 = st.columns(4)
 
 total_items = len(df)
+active_items = int((df["is_active"] == 1).sum()) if "is_active" in df.columns else total_items
+delisted_items = total_items - active_items
 deals_in_view = len(filtered_df)
 max_disc = filtered_df["discount_percent"].max() if not filtered_df.empty else 0.0
 avg_price = filtered_df["current_price"].mean() if not filtered_df.empty else 0.0
 
-col1.metric("Catalog in DB", f"{total_items:,} items")
+col1.metric(
+    "Catalog in View",
+    f"{total_items:,} items",
+    delta=f"{delisted_items} delisted" if delisted_items > 0 else "All Active",
+    delta_color="inverse" if delisted_items > 0 else "normal"
+)
 col2.metric("Matching Deals in View", f"{deals_in_view:,} items")
 col3.metric("Top Discount in View", f"-{max_disc:.1f}%" if max_disc > 0 else "0%")
 col4.metric("Avg Filtered Price", f"{avg_price:.2f} EUR" if avg_price > 0 else "0.00 EUR")
@@ -220,36 +233,72 @@ with tab_analytics:
         
         if not brand_stats.empty:
             brand_stats.columns = ["Brand", "Deals Count", "Avg Discount (%)", "Max Discount (%)"]
-            st.dataframe(brand_stats, use_container_width=True)
+            st.dataframe(brand_stats, use_container_width=True, hide_index=True)
         else:
             st.info("Not enough deal data for brand statistics.")
 
     with col_chart2:
-        st.markdown("##### 🏷 Categories by Total Products")
+        st.markdown("##### 🏷 Categories: Active vs Total Products")
         cat_df = pd.DataFrame(categories_data)
         if not cat_df.empty and "title" in cat_df.columns:
-            st.bar_chart(cat_df.set_index("title")["product_count"])
+            chart_cols = [c for c in ["active_count", "product_count"] if c in cat_df.columns]
+            rename_map = {"active_count": "Active Items", "product_count": "Total in DB"}
+            st.bar_chart(cat_df.set_index("title")[chart_cols].rename(columns=rename_map))
         else:
             st.info("No category data available.")
+
+    st.markdown("---")
+    col_dist1, col_dist2 = st.columns(2)
+    with col_dist1:
+        st.markdown("##### 📉 Discount Depth Distribution")
+        discounted = df[df["discount_percent"] > 0]["discount_percent"]
+        if not discounted.empty:
+            bins = pd.cut(
+                discounted,
+                bins=[0, 20, 40, 60, 80, 100],
+                labels=["1-20%", "21-40%", "41-60%", "61-80%", "81-100%"]
+            )
+            bin_counts = bins.value_counts().sort_index()
+            st.bar_chart(bin_counts)
+        else:
+            st.info("No discounted items found for distribution.")
+
+    with col_dist2:
+        st.markdown("##### 💶 Price Range Distribution (EUR)")
+        prices = df["current_price"]
+        if not prices.empty:
+            price_bins = pd.cut(
+                prices,
+                bins=[0, 25, 50, 100, 150, 250, 1000],
+                labels=["<25€", "25-50€", "50-100€", "100-150€", "150-250€", ">250€"]
+            )
+            price_counts = price_bins.value_counts().sort_index()
+            st.bar_chart(price_counts)
+        else:
+            st.info("No price data available.")
 
 
 # --- TAB 3: DATA EXPLORER ---
 with tab_explorer:
     st.subheader("Raw Catalog Data Explorer")
-    st.caption("Search, inspect, and export cleaned dataset")
+    st.caption("Search, inspect, and export cleaned dataset with lifecycle metadata")
+
+    columns_to_show = [
+        "id", "product_code", "brand", "name", "current_price",
+        "previous_price", "discount_percent", "currency",
+        "is_active", "last_seen_at", "url"
+    ]
+    available_cols = [c for c in columns_to_show if c in filtered_df.columns]
 
     st.dataframe(
-        filtered_df[[
-            "id", "product_code", "brand", "name", "current_price",
-            "previous_price", "discount_percent", "currency", "url"
-        ]],
+        filtered_df[available_cols],
         use_container_width=True,
         hide_index=True
     )
 
     col_dl1, col_dl2 = st.columns(2)
     with col_dl1:
-        csv_data = filtered_df.to_csv(index=False).encode("utf-8")
+        csv_data = filtered_df[available_cols].to_csv(index=False).encode("utf-8")
         st.download_button(
             label="📥 Download Filtered Results (CSV)",
             data=csv_data,
@@ -258,7 +307,7 @@ with tab_explorer:
             use_container_width=True
         )
     with col_dl2:
-        json_data = filtered_df.to_json(orient="records", indent=2).encode("utf-8")
+        json_data = filtered_df[available_cols].to_json(orient="records", indent=2).encode("utf-8")
         st.download_button(
             label="📥 Download Filtered Results (JSON)",
             data=json_data,

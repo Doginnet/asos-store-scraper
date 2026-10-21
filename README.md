@@ -5,7 +5,7 @@
 [![Data Validation](https://img.shields.io/badge/validation-Pydantic%20v2-orange.svg)](https://docs.pydantic.dev/)
 [![Database](https://img.shields.io/badge/persistence-SQLite%20(WAL%20Mode)-lightgrey.svg)](https://www.sqlite.org/)
 [![Dashboard](https://img.shields.io/badge/dashboard-Streamlit-red.svg)](https://streamlit.io/)
-[![Test Suite](https://img.shields.io/badge/tests-12%2F12%20PASS-success.svg)](https://docs.pytest.org/)
+[![Test Suite](https://img.shields.io/badge/tests-13%2F13%20PASS-success.svg)](https://docs.pytest.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An enterprise-grade, resilient web scraping pipeline and price intelligence monitor for **ASOS** (global e-commerce fashion marketplace). The system reverse-engineers internal REST APIs, bypasses Akamai Edge CDN bot management via hardware-level TLS/JA3 impersonation, normalizes product feeds with Pydantic v2, tracks price dynamics in SQLite, and provides an interactive Streamlit dashboard alongside Telegram deal alerting.
@@ -81,11 +81,15 @@ flowchart TD
    * Many-to-Many mapping (`product_categories`) allows products in overlapping categories without duplicating item cards or price snapshots.
    * Time-series price monitoring: records temporal snapshots in `price_history` to track discounts over time.
    * SQL Window functions (`ROW_NUMBER() OVER PARTITION BY product_id ORDER BY id DESC`) prevent duplicate records in deal feeds.
-4. **Interactive Streamlit Dashboard:**
-   * Filter catalog by category, brand, maximum price, and minimum discount percentage.
+4. **Product Lifecycle & Delisting Management:**
+   * Tracks `last_seen_at` timestamp and boolean `is_active` status for every product.
+   * Running a complete category crawl (`--all`) automatically flags delisted and out-of-stock items (`is_active = 0`), keeping analytics and active deal feeds 100% synchronized with the live storefront while retaining historic price data.
+5. **Interactive Streamlit Dashboard:**
+   * Filter catalog by category, brand multiselect, maximum price, and minimum discount percentage.
    * Visual product cards with direct ASOS links.
-   * Price distribution and top-discounted brand analytics.
-5. **Telegram Alerting Skeleton:**
+   * Price distribution, category volume, and top-discounted brand analytics.
+   * Toggle between active-only and full historic catalog views.
+6. **Telegram Alerting Skeleton:**
    * Modular alerter (`TelegramAlerter`) with HTML formatting.
    * Runs in **Safe Mock / Simulation Mode** when no bot tokens are set, logging alerts to console without crashing.
 
@@ -207,6 +211,18 @@ uv run python -m src.main -c 5668 --notify
 
 ---
 
+## ⏰ Automated Scheduled Runs (GitHub Actions)
+
+The repository includes a production-grade CI/CD automation workflow (`.github/workflows/scraper.yml`):
+* **Daily Cron Schedule:** Runs automatically every day at `06:00 UTC` with a full catalog crawl across **ALL categories** (`--all-categories --all`) to refresh complete inventory (~25,000 items) and track price drops.
+* **Manual Dispatch:** Trigger custom crawls on-demand from the GitHub Actions tab (defaults to all categories, with option to select specific categories like `shoes`, `trainers`, etc.).
+* **Flat Data Auto-Commit:** Uses `git-auto-commit-action` to commit updated `data/asos.db` and `data/samples/` back to the repository.
+* **Database Artifacts:** Uploads a 30-day downloadable backup of `data/asos.db` after every execution.
+
+> **Setup Checklist in GitHub Repository:**
+> 1. Navigate to **Settings** ➔ **Actions** ➔ **General** ➔ **Workflow permissions** and choose **Read and write permissions**.
+> 2. *(Optional for live alerts)* Navigate to **Settings** ➔ **Secrets and variables** ➔ **Actions** and add `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
+
 ## 📊 Streamlit Interactive Dashboard
 
 Launch the interactive web UI to explore products, inspect markdown deals, and analyze pricing trends:
@@ -230,6 +246,7 @@ The system includes pre-configured metadata and route mappings in `config/catego
 
 | Category ID | English Title | Slug | Est. Catalog Size |
 |:---:|:---|:---:|:---:|
+| **4209** | Shoes, Boots & Trainers (Full Footwear) | `shoes` | ~2,300 items |
 | **5775** | Trainers & Sneakers | `trainers` | ~1,250 items |
 | **5668** | Hoodies & Sweatshirts | `hoodies` | ~2,000 items |
 | **7616** | T-Shirts & Vests | `t-shirts` | ~7,100 items |
@@ -251,8 +268,9 @@ The project includes offline unit tests, regression tests, and live smoke tests 
 uv run pytest -v
 ```
 
-### Test Coverage Highlights (12/12 PASS):
+### Test Coverage Highlights (13/13 PASS):
 * `test_live_asos_catalog_fetch_limit_72_no_cookies`: Real HTTP GET test verifying 72 items returned per batch.
+* `test_lifecycle_tracking_and_deactivation`: Validates `last_seen_at` updates, `is_active` flag transitions, and automatic deactivation of missing items.
 * `test_language_sanitization`: Verifies system POSIX locales (e.g., `LANG=en_US.UTF-8`) are sanitized to ASOS IETF codes (`en-GB`).
 * `test_null_image_url_handling`: Verifies discontinued/placeholder products parse safely.
 * `test_database_category_relations`: Validates Many-to-Many SQLite schema and isolated deal queries.

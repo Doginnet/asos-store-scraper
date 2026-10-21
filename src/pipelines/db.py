@@ -36,10 +36,21 @@ class AsosDatabase:
                 url TEXT NOT NULL,
                 image_url TEXT,
                 is_selling_fast INTEGER DEFAULT 0,
+                is_active INTEGER DEFAULT 1,
+                last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """)
+
+            # Auto-migrate existing products table if columns are missing
+            cursor.execute("PRAGMA table_info(products)")
+            existing_cols = [row[1] for row in cursor.fetchall()]
+            if "last_seen_at" not in existing_cols:
+                cursor.execute("ALTER TABLE products ADD COLUMN last_seen_at TIMESTAMP")
+                cursor.execute("UPDATE products SET last_seen_at = datetime('now') WHERE last_seen_at IS NULL")
+            if "is_active" not in existing_cols:
+                cursor.execute("ALTER TABLE products ADD COLUMN is_active INTEGER DEFAULT 1")
 
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS price_history (
@@ -83,6 +94,9 @@ class AsosDatabase:
             """)
             cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_pc_category ON product_categories(category_id)
+            """)
+            cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_products_active ON products(is_active)
             """)
 
             # Seed known categories from registry
@@ -128,16 +142,21 @@ class AsosDatabase:
                 """, (category_id, cat_info["slug"], cat_info["title"], now))
 
             for p in products:
-                # Upsert into products
+                # Upsert into products with lifecycle tracking
                 cursor.execute("""
-                INSERT INTO products (id, product_code, name, brand, url, image_url, is_selling_fast, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO products (
+                    id, product_code, name, brand, url, image_url,
+                    is_selling_fast, is_active, last_seen_at, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                     name=excluded.name,
                     brand=excluded.brand,
                     url=excluded.url,
                     image_url=excluded.image_url,
                     is_selling_fast=excluded.is_selling_fast,
+                    is_active=1,
+                    last_seen_at=excluded.last_seen_at,
                     updated_at=excluded.updated_at
                 """, (
                     p.id,
@@ -147,6 +166,7 @@ class AsosDatabase:
                     str(p.url),
                     str(p.imageUrl) if p.imageUrl else None,
                     1 if p.isSellingFast else 0,
+                    now,
                     now
                 ))
 
@@ -180,14 +200,45 @@ class AsosDatabase:
         logger.info(f"Saved {inserted_count} products and price records into {self.db_path} (category_id={category_id})")
         return inserted_count
 
-    def get_top_deals(self, category_id: Optional[int] = None, limit: Optional[int] = 50) -> List[Dict[str, Any]]:
+    def deactivate_unseen_products(self, category_id: int, scrape_start_time: str) -> int:
+        """
+        Marks products in category_id as inactive (is_active = 0) if they were
+        not seen in the category crawl since scrape_start_time.
+        """
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            UPDATE products
+            SET is_active = 0
+            WHERE id IN (
+                SELECT product_id FROM product_categories WHERE category_id = ?
+            )
+            AND (last_seen_at < ? OR last_seen_at IS NULL)
+            AND is_active = 1
+            """, (category_id, scrape_start_time))
+            deactivated_count = cursor.rowcount
+            conn.commit()
+
+        if deactivated_count > 0:
+            logger.info(f"Deactivated {deactivated_count} products for category {category_id} (not seen since {scrape_start_time})")
+        return deactivated_count
+
+    def get_top_deals(
+        self,
+        category_id: Optional[int] = None,
+        limit: Optional[int] = 50,
+        active_only: bool = True
+    ) -> List[Dict[str, Any]]:
         """
         Returns top discounted products (deduplicated by latest price entry) sorted by discount_percent descending.
-        Optionally filtered by category_id.
+        Optionally filtered by category_id and active_only status.
         """
         join_clause = ""
         where_conditions = ["lp.is_marked_down = 1"]
         params: List[Any] = []
+
+        if active_only:
+            where_conditions.append("p.is_active = 1")
 
         if category_id is not None:
             join_clause = "JOIN product_categories pc ON p.id = pc.product_id"
@@ -209,7 +260,7 @@ class AsosDatabase:
             FROM price_history
         )
         SELECT 
-            p.id, p.name, p.brand, p.url, p.image_url, p.is_selling_fast,
+            p.id, p.name, p.brand, p.url, p.image_url, p.is_selling_fast, p.is_active, p.last_seen_at,
             lp.current_price, lp.previous_price, lp.discount_percent, lp.currency
         FROM products p
         JOIN latest_prices lp ON p.id = lp.product_id AND lp.rn = 1
@@ -226,19 +277,29 @@ class AsosDatabase:
             cursor.execute(query, tuple(params))
             return [dict(row) for row in cursor.fetchall()]
 
-    def get_all_products(self, category_id: Optional[int] = None, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_all_products(
+        self,
+        category_id: Optional[int] = None,
+        limit: Optional[int] = None,
+        active_only: bool = True
+    ) -> List[Dict[str, Any]]:
         """
         Returns all unique products from database with their latest recorded price.
-        Optionally filtered by category_id.
+        Optionally filtered by category_id and active_only status.
         """
         join_clause = ""
-        where_clause = ""
+        where_conditions: List[str] = []
         params: List[Any] = []
+
+        if active_only:
+            where_conditions.append("p.is_active = 1")
 
         if category_id is not None:
             join_clause = "JOIN product_categories pc ON p.id = pc.product_id"
-            where_clause = "WHERE pc.category_id = ?"
+            where_conditions.append("pc.category_id = ?")
             params.append(category_id)
+
+        where_clause = f"WHERE {' AND '.join(where_conditions)}" if where_conditions else ""
 
         query = f"""
         WITH latest_prices AS (
@@ -253,7 +314,7 @@ class AsosDatabase:
             FROM price_history
         )
         SELECT 
-            p.id, p.product_code, p.name, p.brand, p.url, p.image_url, p.is_selling_fast,
+            p.id, p.product_code, p.name, p.brand, p.url, p.image_url, p.is_selling_fast, p.is_active, p.last_seen_at,
             lp.current_price, lp.previous_price, lp.is_marked_down, lp.discount_percent, lp.currency
         FROM products p
         JOIN latest_prices lp ON p.id = lp.product_id AND lp.rn = 1
@@ -272,12 +333,15 @@ class AsosDatabase:
 
     def get_categories(self) -> List[Dict[str, Any]]:
         """
-        Returns all registered categories with count of mapped products.
+        Returns all registered categories with count of mapped products and active products.
         """
         query = """
-        SELECT c.id, c.slug, c.title, count(pc.product_id) as product_count
+        SELECT c.id, c.slug, c.title,
+               count(pc.product_id) as product_count,
+               COALESCE(sum(case when p.is_active = 1 then 1 else 0 end), 0) as active_count
         FROM categories c
         LEFT JOIN product_categories pc ON c.id = pc.category_id
+        LEFT JOIN products p ON pc.product_id = p.id
         GROUP BY c.id, c.slug, c.title
         ORDER BY c.id ASC
         """
@@ -285,4 +349,5 @@ class AsosDatabase:
             cursor = conn.cursor()
             cursor.execute(query)
             return [dict(row) for row in cursor.fetchall()]
+
 

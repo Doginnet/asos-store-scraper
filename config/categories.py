@@ -13,9 +13,15 @@ class AsosCategory(IntEnum):
     SWEATERS = 7617
     BOOTS = 5774
     ACCESSORIES = 4210
+    SHOES = 4209
 
 
 CATEGORY_REGISTRY: Dict[int, Dict[str, str]] = {
+    AsosCategory.SHOES: {
+        "slug": "shoes",
+        "title": "Shoes, Boots & Trainers",
+        "description": "Complete men's footwear: trainers, boots, loafers, boat shoes, and dress shoes"
+    },
     AsosCategory.TRAINERS: {
         "slug": "trainers",
         "title": "Trainers & Sneakers",
@@ -123,3 +129,20 @@ def resolve_store_and_currency(country: str = "BG", store: Optional[str] = None,
         resolved_currency = currency.strip().upper() if currency else "EUR"
 
     return country_upper, resolved_store, resolved_currency
+
+
+def resolve_category(identifier: int | str) -> int:
+    """
+    Resolves category identifier to an integer ID.
+    Accepts integer IDs (e.g., 5775), numeric strings ('5775'), or slugs ('trainers', 'shoes').
+    """
+    if isinstance(identifier, int):
+        return identifier
+    s = str(identifier).strip().lower()
+    if s.isdigit():
+        return int(s)
+    for cat_id, meta in CATEGORY_REGISTRY.items():
+        if meta["slug"].lower() == s:
+            return cat_id
+    valid_options = [f"{meta['slug']} ({cat_id})" for cat_id, meta in CATEGORY_REGISTRY.items()]
+    raise ValueError(f"Unknown category '{identifier}'. Valid options: {', '.join(valid_options)}")

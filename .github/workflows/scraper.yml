@@ -1,0 +1,130 @@
+name: ASOS Catalog Scraper & Monitor
+
+on:
+  schedule:
+    # Runs daily at 06:00 UTC (09:00 MSK / 08:00 CEST)
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      category:
+        description: 'ASOS Category (slug, or "all" for full catalog)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - 'all'
+          - 'shoes'
+          - 'trainers'
+          - 'hoodies'
+          - 't-shirts'
+          - 'jeans'
+          - 'jackets'
+          - 'trousers'
+          - 'shirts'
+          - 'sweaters'
+          - 'boots'
+          - 'accessories'
+      full_crawl:
+        description: 'Scrape all items in category (--all)'
+        required: true
+        default: true
+        type: boolean
+      limit:
+        description: 'Page size limit per request'
+        required: true
+        default: '72'
+      notify:
+        description: 'Send Telegram deal alerts'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scraper-sync
+  cancel-in-progress: false
+
+jobs:
+  scrape-and-sync:
+    name: Run Scraper & Sync Catalog
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          version: "latest"
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --locked || uv sync
+
+      - name: Run automated test suite
+        run: uv run pytest -v -m unit
+
+      - name: Run ASOS Scraper (Scheduled Daily Run - Full Catalog)
+        if: github.event_name == 'schedule'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ALERT_MIN_DISCOUNT_PERCENT: 60
+        run: |
+          echo "Starting scheduled full catalog crawl across ALL categories..."
+          uv run python -m src.main --all-categories --all --notify
+
+      - name: Run ASOS Scraper (Manual Dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ALERT_MIN_DISCOUNT_PERCENT: 60
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.category }}" = "all" ]; then
+            ARGS="$ARGS --all-categories"
+          else
+            ARGS="$ARGS -c ${{ github.event.inputs.category }}"
+          fi
+
+          if [ "${{ github.event.inputs.full_crawl }}" = "true" ]; then
+            ARGS="$ARGS --all"
+          else
+            ARGS="$ARGS --max-items 144"
+          fi
+
+          ARGS="$ARGS --limit ${{ github.event.inputs.limit }}"
+
+          if [ "${{ github.event.inputs.notify }}" = "true" ]; then
+            ARGS="$ARGS --notify"
+          fi
+
+          echo "Running: uv run python -m src.main $ARGS"
+          uv run python -m src.main $ARGS
+
+      - name: Commit and push updated data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(data): automated ASOS catalog update [skip ci]"
+          file_pattern: "data/asos.db data/samples/**"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+      - name: Upload Database Artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: asos-database-backup
+          path: data/asos.db
+          retention-days: 30
