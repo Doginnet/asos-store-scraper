@@ -102,7 +102,6 @@ asos-store/
 ├── pyproject.toml              # Dependencies and metadata (managed via uv)
 ├── .env.example                # Configuration template
 ├── README.md                   # Project showcase & documentation
-├── SCRAPER_SPEC.md             # Resource & API passport
 ├── config/
 │   ├── settings.py             # Pydantic BaseSettings with POSIX locale protection
 │   └── categories.py           # Catalog registry (Trainers, Hoodies, T-Shirts, etc.)

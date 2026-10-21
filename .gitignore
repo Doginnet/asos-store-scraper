@@ -22,6 +22,16 @@ logs/
 .pytest_cache/
 .coverage
 
+# Internal / Development Documentation (mirrored in Notion)
+AGENTS.md
+PLAN.md
+SRS.md
+SCRAPER_SPEC.md
+TODO.md
+WORKFLOW.md
+docs/
+
 # OS generated
 .DS_Store
 Thumbs.db
+
