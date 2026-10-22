@@ -25,6 +25,7 @@ logs/
 # Internal / Development Documentation (mirrored in Notion)
 AGENTS.md
 PLAN.md
+PLAYBOOK.md
 SRS.md
 SCRAPER_SPEC.md
 TODO.md
