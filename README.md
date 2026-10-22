@@ -102,6 +102,7 @@ asos-store/
 ├── pyproject.toml              # Dependencies and metadata (managed via uv)
 ├── .env.example                # Configuration template
 ├── README.md                   # Project showcase & documentation
+├── assets/                     # Dashboard showcase screenshots & media
 ├── config/
 │   ├── settings.py             # Pydantic BaseSettings with POSIX locale protection
 │   └── categories.py           # Catalog registry (Trainers, Hoodies, T-Shirts, etc.)
@@ -229,6 +230,18 @@ Launch the interactive web UI to explore products, inspect markdown deals, and a
 ```bash
 uv run streamlit run src/dashboard/app.py
 ```
+
+### 🖼️ UI Showcase
+
+#### 1. Live Deal Cards Showcase & Real-Time Filtering
+Browse filtered clearance products with dynamic discount sliders, category navigation, brand search, and direct store links.
+
+![Deal Cards Showcase](assets/dashboard_showcase.png)
+
+#### 2. Market & Price Drop Analytics
+Analyze top discounted brands, price distribution histograms, and active vs. delisted catalog volumes across all 10 categories.
+
+![Market & Price Analytics](assets/dashboard_analytics.png)
 
 ### Dashboard Features:
 * **Interactive Filters:** Filter by category, brand multiselect, minimum discount %, and price slider.
