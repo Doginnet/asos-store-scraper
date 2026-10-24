@@ -1,4 +1,4 @@
-# 🛍 ASOS E-commerce Catalog & Price Monitor
+# ASOS E-commerce Catalog & Price Monitor
 
 [![Python Version](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Anti-Bot Bypass](https://img.shields.io/badge/transport-curl__cffi%20(Chrome%20124)-brightgreen.svg)](https://github.com/yifeikong/curl_cffi)
@@ -12,7 +12,7 @@ An enterprise-grade, resilient web scraping pipeline and price intelligence moni
 
 ---
 
-## 📌 Executive Summary & Business Value
+## Executive Summary & Business Value
 
 * **Competitive Price Intelligence:** Tracks real-time price drops, discount percentages (up to -76%), and markdown velocity across 10 major commercial fashion categories.
 * **Arbitrage & Deal Scouting:** Automatically isolates high-margin clearance items and deals into category-specific datasets.
@@ -21,7 +21,7 @@ An enterprise-grade, resilient web scraping pipeline and price intelligence moni
 
 ---
 
-## 🏛 Architecture Overview
+## Architecture Overview
 
 ```mermaid
 flowchart TD
@@ -69,7 +69,7 @@ flowchart TD
 
 ---
 
-## ⚡ Key Engineering Features
+## Key Engineering Features
 
 1. **Akamai Edge Bypass & Store Routing:**
    * Uses `curl_cffi` to match Google Chrome 124 TLS cipher suites, extensions, and HTTP/2 settings byte-for-byte.
@@ -95,7 +95,7 @@ flowchart TD
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```plain text
 asos-store/
@@ -141,7 +141,7 @@ asos-store/
 
 ---
 
-## 🚀 Quick Start & Installation
+## Quick Start & Installation
 
 This project uses [`uv`](https://github.com/astral-sh/uv) for blazing-fast, isolated dependency management.
 
@@ -163,17 +163,17 @@ cp .env.example .env
 
 ---
 
-## 💻 CLI Usage Guide
+## CLI Usage Guide
 
 Run the main scraper orchestrator via `uv run python -m src.main`:
 
-### 🔹 Single Category Scrape (Default: Trainers - 5775)
+### Single Category Scrape (Default: Trainers - 5775)
 ```bash
 # Collect 72 sneakers and display top deals table:
 uv run python -m src.main --limit 72 --max-items 72
 ```
 
-### 🔹 Scrape Any Category by ID
+### Scrape Any Category by ID
 ```bash
 # Hoodies & Sweatshirts (ID: 5668):
 uv run python -m src.main --category-id 5668 --limit 72 --max-items 144
@@ -182,7 +182,7 @@ uv run python -m src.main --category-id 5668 --limit 72 --max-items 144
 uv run python -m src.main --category-id 3606 --limit 72 --max-items 72
 ```
 
-### 🔹 Cross-Category Scraping (`--all-categories`)
+### Cross-Category Scraping (`--all-categories`)
 ```bash
 # Scrape initial batches across all 10 registered categories:
 uv run python -m src.main --all-categories --limit 72 --max-items 72
@@ -191,13 +191,13 @@ uv run python -m src.main --all-categories --limit 72 --max-items 72
 uv run python -m src.main --all-categories --all
 ```
 
-### 🔹 Trigger Telegram Deal Alerts
+### Trigger Telegram Deal Alerts
 ```bash
 # Scrape hoodies and trigger deal notifications (runs in mock mode without credentials):
 uv run python -m src.main -c 5668 --notify
 ```
 
-### 🔹 CLI Parameters Reference
+### CLI Parameters Reference
 | Flag | Short | Default | Description |
 |:---|:---:|:---:|:---|
 | `--category-id` | `-c` | `5775` | ASOS Category ID to scrape |
@@ -211,7 +211,7 @@ uv run python -m src.main -c 5668 --notify
 
 ---
 
-## ⏰ Automated Scheduled Runs (GitHub Actions)
+## Automated Scheduled Runs (GitHub Actions)
 
 The repository includes a production-grade CI/CD automation workflow (`.github/workflows/scraper.yml`):
 * **Daily Cron Schedule:** Runs automatically every day at `06:00 UTC` with a full catalog crawl across **ALL categories** (`--all-categories --all`) to refresh complete inventory (~25,000 items) and track price drops.
@@ -223,7 +223,7 @@ The repository includes a production-grade CI/CD automation workflow (`.github/w
 > 1. Navigate to **Settings** ➔ **Actions** ➔ **General** ➔ **Workflow permissions** and choose **Read and write permissions**.
 > 2. *(Optional for live alerts)* Navigate to **Settings** ➔ **Secrets and variables** ➔ **Actions** and add `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
 
-## 📊 Streamlit Interactive Dashboard
+## Streamlit Interactive Dashboard
 
 Launch the interactive web UI to explore products, inspect markdown deals, and analyze pricing trends:
 
@@ -231,7 +231,7 @@ Launch the interactive web UI to explore products, inspect markdown deals, and a
 uv run streamlit run src/dashboard/app.py
 ```
 
-### 🖼️ UI Showcase
+### UI Showcase
 
 #### 1. Live Deal Cards Showcase & Real-Time Filtering
 Browse filtered clearance products with dynamic discount sliders, category navigation, brand search, and direct store links.
@@ -252,7 +252,7 @@ Analyze top discounted brands, price distribution histograms, and active vs. del
 
 ---
 
-## 🏷 Supported Categories Registry
+## Supported Categories Registry
 
 The system includes pre-configured metadata and route mappings in `config/categories.py`:
 
@@ -272,7 +272,7 @@ The system includes pre-configured metadata and route mappings in `config/catego
 
 ---
 
-## 🧪 Testing & Quality Assurance
+## Testing & Quality Assurance
 
 The project includes offline unit tests, regression tests, and live smoke tests executed via `pytest`:
 
@@ -291,7 +291,7 @@ uv run pytest -v
 
 ---
 
-## ⚖️ Legal & Ethical Scraping Notice
+## Legal & Ethical Scraping Notice
 
 This project was built for educational, portfolio, and research purposes.
 * All requests respect web etiquette by enforcing polite jitter delays (`0.5s – 1.2s`) between page requests.
